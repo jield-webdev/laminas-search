@@ -1,0 +1,79 @@
+{
+  "name": "jield-webdev/laminas-search",
+  "description": "Laminas Module for interaction between a laminas application and a SOLR search engine using Solarium",
+  "type": "library",
+  "keywords": [
+    "solr",
+    "solarium",
+    "module",
+    "laminas"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/jield-webdev/laminas-search",
+  "authors": [
+    {
+      "name": "Johan van der Heide",
+      "email": "info@jield.nl",
+      "homepage": "https://jield.nl"
+    }
+  ],
+  "minimum-stability": "dev",
+  "require": {
+    "php": "^8.0 || ^8.1",
+    "laminas/laminas-mvc": "^3.3",
+    "laminas/laminas-form": "^3.6",
+    "laminas/laminas-i18n": "^2.19",
+    "laminas/laminas-paginator": "^2.16",
+    "kokspflanze/zfc-twig": "~4.0",
+    "jetbrains/phpstorm-attributes": "^1.0",
+    "solarium/solarium": "^6.2"
+  },
+  "require-dev": {
+    "iteaoffice/testing": "^3.5-dev"
+  },
+  "autoload": {
+    "psr-4": {
+      "Jield\\Search\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Jield\\SearchTest\\": "src"
+    }
+  },
+  "config": {
+    "vendor-dir": "vendor",
+    "optimize-autoloader": true,
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "composer/package-versions-deprecated": true
+    }
+  },
+  "extra": {
+    "laminas": {
+      "module": "LaminasSearch"
+    },
+    "branch-alias": {
+      "dev-master": "1.0-dev",
+      "dev-develop": "1.1-dev"
+    }
+  },
+  "scripts": {
+    "check": [
+      "@php-lint",
+      "@phpstan",
+      "@cs",
+      "@test"
+    ],
+    "fix": [
+      "@cbf",
+      "@cs-fix"
+    ],
+    "php-lint": "./vendor/bin/parallel-lint src",
+    "phpstan": "./vendor/bin/phpstan analyse src/ --level=1",
+    "cs": "./vendor/bin/phpcs -n -p --standard=PSR2 --extensions=php,twig src",
+    "cbf": "./vendor/bin/phpcbf src --standard=PSR2",
+    "cs-fix": "./vendor/bin/php-cs-fixer fix -v src",
+    "test": "./vendor/bin/phpunit"
+  }
+}
