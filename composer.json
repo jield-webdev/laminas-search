@@ -1,5 +1,5 @@
 {
-  "name": "jield-webdev/laminas-search",
+  "name": "jield-webdev/jield-search",
   "description": "Laminas Module for interaction between a laminas application and a SOLR search engine using Solarium",
   "type": "library",
   "keywords": [
@@ -9,7 +9,7 @@
     "laminas"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/jield-webdev/laminas-search",
+  "homepage": "https://github.com/jield-webdev/jield-search",
   "authors": [
     {
       "name": "Johan van der Heide",
