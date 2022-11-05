@@ -70,11 +70,11 @@ final class Util
             return $value;
         }
 
-        if (!is_string($value)) {
+        if (!is_string(value: $value)) {
             return (string)$value;
         }
 
-        return '"' . str_replace(self::$search, self::$replace, $value) . '"';
+        return '"' . str_replace(search: self::$search, replace: self::$replace, subject: $value) . '"';
     }
 
     /**
@@ -91,7 +91,7 @@ final class Util
 
         if ($type === 'string') {
             if ($value !== '') {
-                return '"' . str_replace(self::$search, self::$replace, (string)$value) . '"';
+                return '"' . str_replace(search: self::$search, replace: self::$replace, subject: (string)$value) . '"';
             }
 
             return $value;
@@ -105,10 +105,10 @@ final class Util
             static $precision;
 
             if (!$precision) {
-                $precision = defined('HHVM_VERSION') ? 14 : ini_get('precision');
+                $precision = defined(constant_name: 'HHVM_VERSION') ? 14 : ini_get(option: 'precision');
             }
 
-            return number_format($value, $precision, '.', '');
+            return number_format(num: $value, decimals: $precision, decimal_separator: '.', thousands_separator: '');
         }
 
         if ($type === 'boolean') {
@@ -135,10 +135,10 @@ final class Util
             return $value;
         }
 
-        if (!is_string($value)) {
+        if (!is_string(value: $value)) {
             return (string)$value;
         }
 
-        return str_replace(self::$search, self::$replace, $value);
+        return str_replace(search: self::$search, replace: self::$replace, subject: $value);
     }
 }

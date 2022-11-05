@@ -51,13 +51,13 @@ class QueryString implements Stringable
 
         foreach ($this->placeholders as $placeholder => $value) {
             if ($value instanceof DateTime) {
-                $value = new DateTimeExpression($value);
-            } elseif (is_array($value)) {
-                $value = new GroupExpression($value);
-            } elseif (is_bool($value)) {
+                $value = new DateTimeExpression(date: $value);
+            } elseif (is_array(value: $value)) {
+                $value = new GroupExpression(expressions: $value);
+            } elseif (is_bool(value: $value)) {
                 $value = $value ? 'true' : 'false';
             } else {
-                $value = Util::sanitize($value);
+                $value = Util::sanitize(value: $value);
             }
 
             $replacements['<' . $placeholder . '>'] = (string)$value;

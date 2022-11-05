@@ -39,6 +39,6 @@ class GeofiltExpression extends Expression implements Stringable
 
         $params = array_merge($params, $this->additionalParams);
 
-        return (string) new LocalParamsExpression('geofilt', $params);
+        return (string) new LocalParamsExpression(type: 'geofilt', params: $params);
     }
 }

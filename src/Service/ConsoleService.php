@@ -23,10 +23,10 @@ class ConsoleService
         //Do an init check
         foreach ($services ?? [] as $key => $service) {
             if (!$this->container->has($service['service'])) {
-                throw new InvalidArgumentException(sprintf('Service %s not found', $service['service']));
+                throw new InvalidArgumentException(message: sprintf('Service %s not found', $service['service']));
             }
 
-            Assert::isInstanceOf(new $service['entity'](), HasSearchInterface::class);
+            Assert::isInstanceOf(value: new $service['entity'](), class: HasSearchInterface::class);
 
             $this->services[$key] = $service;
         }
@@ -56,12 +56,12 @@ class ConsoleService
         }
 
         if (!isset($this->services[$index])) {
-            $output->writeln(sprintf('<error>Index %s not found</error>', $index));
+            $output->writeln(messages: sprintf('<error>Index %s not found</error>', $index));
 
             return;
         }
 
-        $output->writeln(sprintf('<info>Updating index %s</info>', $index));
+        $output->writeln(messages: sprintf('<info>Updating index %s</info>', $index));
 
         //We have the service, so get it
         /** @var AbstractSearchService $serviceInstance */

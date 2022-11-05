@@ -24,7 +24,7 @@ class SolariumPaginator implements AdapterInterface
     public function count(): int
     {
         if (null === $this->count) {
-            $this->getItems(0, 0);
+            $this->getItems(offset: 0, itemCountPerPage: 0);
         }
 
         return $this->count;
@@ -32,9 +32,9 @@ class SolariumPaginator implements AdapterInterface
 
     public function getItems($offset, $itemCountPerPage): iterable|Result|ResultInterface
     {
-        $this->query->setStart($offset);
-        $this->query->setRows($itemCountPerPage);
-        $result = $this->client->select($this->query);
+        $this->query->setStart(start: $offset);
+        $this->query->setRows(rows: $itemCountPerPage);
+        $result = $this->client->select(query: $this->query);
         $this->count = $result->getNumFound();
 
         return $result;

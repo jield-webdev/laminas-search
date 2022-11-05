@@ -17,26 +17,26 @@ final class TestIndex extends Command
 
     public function __construct(private readonly ConsoleService $consoleService)
     {
-        parent::__construct(self::$defaultName);
+        parent::__construct(name: self::$defaultName);
     }
 
     protected function configure(): void
     {
-        $this->addOption('reset', 'r', InputOption::VALUE_NONE, 'Reset index');
+        $this->addOption(name: 'reset', shortcut: 'r', mode: InputOption::VALUE_NONE, description: 'Reset index');
 
-        $this->setName(self::$defaultName);
+        $this->setName(name: self::$defaultName);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $reset = $input->getOption('reset');
+        $reset = $input->getOption(name: 'reset');
 
-        $output->writeln('<info>Testing the search engine index</info>');
+        $output->writeln(messages: '<info>Testing the search engine index</info>');
 
         $this->consoleService->testIndex(output: $output, clearIndex: $reset);
 
-        $output->writeln('');
-        $output->writeln('<info>Test the search engine index completed</info>');
+        $output->writeln(messages: '');
+        $output->writeln(messages: '<info>Test the search engine index completed</info>');
 
         return Command::SUCCESS;
     }

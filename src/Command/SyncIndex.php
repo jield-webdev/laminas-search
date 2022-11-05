@@ -16,20 +16,20 @@ final class SyncIndex extends Command
 
     public function __construct(private readonly ConsoleService $consoleService)
     {
-        parent::__construct(self::$defaultName);
+        parent::__construct(name: self::$defaultName);
     }
 
     protected function configure(): void
     {
-        $this->setName(self::$defaultName);
+        $this->setName(name: self::$defaultName);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $output->writeln('<info>Syncing the search engine index</info>');
+        $output->writeln(messages: '<info>Syncing the search engine index</info>');
         $this->consoleService->syncIndex(output: $output);
-        $output->writeln('');
-        $output->writeln('<info>Synchronisation the search engine index completed</info>');
+        $output->writeln(messages: '');
+        $output->writeln(messages: '<info>Synchronisation the search engine index completed</info>');
 
         return Command::SUCCESS;
     }

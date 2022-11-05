@@ -27,13 +27,13 @@ class BooleanExpression extends Expression implements Stringable
      */
     #[Pure] public function __construct(private readonly string $operator, $expr, private readonly bool $useNotNotation = false)
     {
-        parent::__construct($expr);
+        parent::__construct(expr: $expr);
     }
 
     public function __toString(): string
     {
         return $this->useNotNotation
-            ? '(*:* NOT ' . Util::escape($this->expr) . ')'
-            : $this->operator . Util::escape($this->expr);
+            ? '(*:* NOT ' . Util::escape(value: $this->expr) . ')'
+            : $this->operator . Util::escape(value: $this->expr);
     }
 }

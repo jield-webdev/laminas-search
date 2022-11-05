@@ -31,14 +31,14 @@ class LocalParamsExpression extends Expression implements Stringable
 
     private function buildParamString(): string
     {
-        if ($this->shortForm && count($this->params) === 1 && key($this->params) === $this->type) {
-            return '=' . Util::sanitize(current($this->params));
+        if ($this->shortForm && count($this->params) === 1 && key(array: $this->params) === $this->type) {
+            return '=' . Util::sanitize(value: current(array: $this->params));
         }
 
         $paramsString = '';
 
         foreach ($this->params as $key => $value) {
-            $paramsString .= ' ' . $key . '=' . Util::sanitize($value);
+            $paramsString .= ' ' . $key . '=' . Util::sanitize(value: $value);
         }
 
         return $paramsString;

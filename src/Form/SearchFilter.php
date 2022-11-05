@@ -17,11 +17,11 @@ class SearchFilter extends Form
     public function __construct()
     {
         parent::__construct();
-        $this->setAttribute('method', 'get');
-        $this->setAttribute('id', 'search-form');
+        $this->setAttribute(key: 'method', value: 'get');
+        $this->setAttribute(key: 'id', value: 'search-form');
 
         $this->add(
-            [
+            elementOrFieldset: [
                 'type'       => Search::class,
                 'name'       => 'query',
                 'attributes' => [
@@ -32,14 +32,14 @@ class SearchFilter extends Form
         );
 
         $this->add(
-            [
+            elementOrFieldset: [
                 'type' => Checkbox::class,
                 'name' => 'onlyActive',
             ]
         );
 
         $this->add(
-            [
+            elementOrFieldset: [
                 'type'       => Submit::class,
                 'name'       => 'search',
                 'attributes' => [
@@ -51,7 +51,7 @@ class SearchFilter extends Form
         );
 
         $this->add(
-            [
+            elementOrFieldset: [
                 'type'       => Submit::class,
                 'name'       => 'submit',
                 'attributes' => [
@@ -63,7 +63,7 @@ class SearchFilter extends Form
         );
 
         $this->add(
-            [
+            elementOrFieldset: [
                 'type'       => Submit::class,
                 'name'       => 'reset',
                 'attributes' => [

@@ -25,7 +25,7 @@ class FuzzyExpression extends Expression implements Stringable
      */
     #[Pure] public function __construct($expr, ?float $similarity = null)
     {
-        parent::__construct($expr);
+        parent::__construct(expr: $expr);
 
         if ($similarity !== null) {
             $this->similarity = $similarity;
@@ -34,6 +34,6 @@ class FuzzyExpression extends Expression implements Stringable
 
     public function __toString(): string
     {
-        return Util::escape($this->expr) . '~' . $this->similarity;
+        return Util::escape(value: $this->expr) . '~' . $this->similarity;
     }
 }

@@ -22,27 +22,33 @@ final class SearchFormResult
         private ?string $query = null,
         private array $filter = [],
         private array $facet = [],
+        private DateInterval $dateInterval = new DateInterval(),
     ) {
     }
 
     #[Pure] public static function fromArray(array $params): SearchFormResult
     {
         return new self(
-            order:     $params['order'] ?? 'default',
+            order: $params['order'] ?? 'default',
             direction: $params['direction'] ?? Criteria::ASC,
-            query:     $params['query'] ?? null,
-            filter:    $params['filter'] ?? [],
-            facet:     $params['facet'] ?? []
+            query: $params['query'] ?? null,
+            filter: $params['filter'] ?? [],
+            facet: $params['facet'] ?? [],
+            dateInterval: DateInterval::fromValue(value: $params['dateInterval'] ?? ''),
         );
     }
 
     public function updateFromEncodedFilter(string $encodedFilter): SearchFormResult
     {
-        $filter = (array)Json\Json::decode(encodedValue: base64_decode($encodedFilter), objectDecodeType: Json\Json::TYPE_ARRAY);
+        $filter = (array)Json\Json::decode(
+            encodedValue: base64_decode(string: $encodedFilter),
+            objectDecodeType: Json\Json::TYPE_ARRAY
+        );
 
         $this->filter = (array)($filter['filter'] ?? []);
-        $this->facet  = (array)($filter['facet'] ?? []);
-        $this->query  = $filter['query'] ?? null;
+        $this->facet = (array)($filter['facet'] ?? []);
+        $this->dateInterval = DateInterval::fromValue(value: $filter['dateInterval'] ?? '');
+        $this->query = $filter['query'] ?? null;
 
         return $this;
     }
@@ -61,17 +67,18 @@ final class SearchFormResult
 
     public function getHash(): string
     {
-        return base64_encode(Json\Json::encode($this->toArray()));
+        return base64_encode(string: Json\Json::encode(valueToEncode: $this->toArray()));
     }
 
     public function toArray(): array
     {
         return [
-            'order'     => $this->order,
+            'order' => $this->order,
             'direction' => $this->direction,
-            'query'     => $this->query,
-            'filter'    => $this->filter,
-            'facet'     => $this->facet,
+            'query' => $this->query,
+            'filter' => $this->filter,
+            'facet' => $this->facet,
+            'dateInterval' => $this->dateInterval->toValue(),
         ];
     }
 
@@ -88,7 +95,7 @@ final class SearchFormResult
     public function setFilterByKey(string $key, mixed $value, bool $force = false): SearchFormResult
     {
         //Only set the value when we force it or when it does not exist
-        if ($force || !array_key_exists($key, $this->filter)) {
+        if ($force || !array_key_exists(key: $key, array: $this->filter)) {
             $this->filter[$key] = $value;
         }
 
@@ -98,7 +105,7 @@ final class SearchFormResult
     public function setFacetByKey(string $key, mixed $value, bool $force = false): SearchFormResult
     {
         //Only set the value when we force it or when it does not exist
-        if ($force || !array_key_exists($key, $this->facet)) {
+        if ($force || !array_key_exists(key: $key, array: $this->facet)) {
             $this->facet[$key]['values'] = $value;
         }
 
@@ -107,7 +114,7 @@ final class SearchFormResult
 
     public function hasFilterByKey(string $key): bool
     {
-        return array_key_exists($key, $this->filter) && '' !== $this->filter[$key];
+        return array_key_exists(key: $key, array: $this->filter) && '' !== $this->filter[$key];
     }
 
     public function hasQuery(): bool
@@ -122,7 +129,7 @@ final class SearchFormResult
 
     public function setDirection(string $direction): SearchFormResult
     {
-        $this->direction = strtoupper($direction);
+        $this->direction = strtoupper(string: $direction);
         return $this;
     }
 
@@ -145,9 +152,9 @@ final class SearchFormResult
 
     public function getDirection(): string
     {
-        $direction = strtoupper($this->direction);
+        $direction = strtoupper(string: $this->direction);
 
-        if (!in_array($direction, [Criteria::ASC, Criteria::DESC], true)) {
+        if (!in_array(needle: $direction, haystack: [Criteria::ASC, Criteria::DESC], strict: true)) {
             return Criteria::DESC;
         }
 
@@ -157,7 +164,7 @@ final class SearchFormResult
     public function addFilters(array $filters): SearchFormResult
     {
         foreach ($filters as $key => $value) {
-            $this->addFilter($key, $value);
+            $this->addFilter(key: $key, value: $value);
         }
 
         return $this;
@@ -165,12 +172,23 @@ final class SearchFormResult
 
     public function addFilter(string $key, mixed $value): SearchFormResult
     {
-        if (array_key_exists($key, $this->filter)) {
+        if (array_key_exists(key: $key, array: $this->filter)) {
             $this->filter[$key] += $value;
         } else {
             $this->filter[$key] = $value;
         }
 
+        return $this;
+    }
+
+    public function getDateInterval(): DateInterval
+    {
+        return $this->dateInterval;
+    }
+
+    public function setDateInterval(DateInterval $dateInterval): SearchFormResult
+    {
+        $this->dateInterval = $dateInterval;
         return $this;
     }
 

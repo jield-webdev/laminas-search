@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace Jield\Search\Form;
 
+use Jield\Search\Service\AbstractSearchService;
+use Jield\Search\ValueObject\FacetField;
 use Laminas\Form\Element\Checkbox;
-use Laminas\Form\Element;
 use Laminas\Form\Element\MultiCheckbox;
-use Laminas\Form\Element\Radio;
+use Laminas\Form\Element\Text;
 use Laminas\Form\Fieldset;
 use Laminas\InputFilter\InputFilterProviderInterface;
 use RuntimeException;
-use Jield\Search\Service\AbstractSearchService;
-use Jield\Search\ValueObject\FacetField;
 use Solarium\Component\Result\Facet\FacetResultInterface;
 
 use function _;
@@ -30,44 +29,34 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
         bool $hasDateInterval = false
     ) {
         parent::__construct();
-        $this->setAttribute('method', $method);
-        $this->setAttribute('action', '');
-
-        $filter = new Fieldset('filter');
+        
+        $this->setAttribute(key: 'method', value: $method);
+        $this->setAttribute(key: 'action', value: '');
 
         if ($hasDateInterval) {
-            $filter->add(
-                [
-                    'type'    => Radio::class,
-                    'name'    => 'dateInterval',
+            $this->add(
+                elementOrFieldset: [
+                    'type' => Text::class,
+                    'name' => 'dateInterval',
                     'options' => [
-                        'value_options' => [
-                            'upcoming' => _('txt-upcoming'),
-                            'P1M'      => _('txt-last-month'),
-                            'P3M'      => _('txt-last-3-months'),
-                            'P6M'      => _('txt-last-6-months'),
-                            'P12M'     => _('txt-last-year'),
-                            'older'    => _('txt-older-than-one-year'),
-                            'all'      => _('txt-all-results'),
-                        ],
-                        'allow_empty'   => true,
-                        'empty_option'  => '— Select a period',
-                        'label'         => _('txt-date-interval'),
+                        'isDateRange' => true,
+                        'label' => _('txt-date-interval'),
                     ],
                 ]
             );
         }
 
+        $filter = new Fieldset(name: 'filter');
+
         // Add the field selection
         if (!empty($fields)) {
             foreach ($fields as $key => $values) {
                 $filter->add(
-                    [
+                    elementOrFieldset: [
                         'type' => MultiCheckbox::class,
                         'name' => $key,
-
                         'options' => [
-                            'label'         => $key,
+                            'label' => $key,
                             'value_options' => $values,
                         ],
                     ]
@@ -75,35 +64,35 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
             }
         }
 
-        $this->add($filter);
+        $this->add(elementOrFieldset: $filter);
     }
 
     public function createFacetFormElements(): void
     {
-        $facetFieldset = new Fieldset('facet');
+        $facetFieldset = new Fieldset(name: 'facet');
 
         foreach ($this->searchService->getFacets() as $facetField) {
-            $facetElementFieldset = new Fieldset($facetField->getField());
-            $field                = $this->getFacetByFacetField($facetField->getField());
+            $facetElementFieldset = new Fieldset(name: $facetField->getField());
+            $field = $this->getFacetByFacetField(fieldName: $facetField->getField());
 
             if ($facetField->getHasYesNo()) {
-                $facetElementFieldset->add($this->createYesNoFormElement());
+                $facetElementFieldset->add(elementOrFieldset: $this->createYesNoFormElement());
             }
 
             $facetElementFieldset->add(
-                $this->createFacetFieldFormElement($field, $facetField)
+                elementOrFieldset: $this->createFacetFieldFormElement(field: $field, facetField: $facetField)
             );
 
             if ($facetField->getHasAndOr()) {
-                $facetElementFieldset->add($this->createAndOrFormElement());
+                $facetElementFieldset->add(elementOrFieldset: $this->createAndOrFormElement());
             }
 
-            if ((is_countable($field) ? count($field) : 0) > 0) {
-                $facetFieldset->add($facetElementFieldset);
+            if ((is_countable(value: $field) ? count($field) : 0) > 0) {
+                $facetFieldset->add(elementOrFieldset: $facetElementFieldset);
             }
         }
 
-        $this->add($facetFieldset);
+        $this->add(elementOrFieldset: $facetFieldset);
     }
 
     private function getFacetByFacetField(string $fieldName): FacetResultInterface
@@ -111,10 +100,10 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
         $facetSet = $this->searchService->getResultSet()->getFacetSet();
 
         if (null === $facetSet) {
-            throw new RuntimeException("This search has no facets");
+            throw new RuntimeException(message: "This search has no facets");
         }
 
-        $facetField = $this->searchService->getFacet($fieldName);
+        $facetField = $this->searchService->getFacet(fieldName: $fieldName);
 
         return $facetSet->getFacet($facetField->getField());
     }
@@ -122,11 +111,10 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
     private function createYesNoFormElement(): Checkbox
     {
         $yesNoElement = new Checkbox();
-        $yesNoElement->setName('yesNo');
-        $yesNoElement->setLabel('txt-yes-no');
+        $yesNoElement->setName(name: 'yesNo');
+        $yesNoElement->setLabel(label: 'txt-yes-no');
         $yesNoElement->setCheckedValue(checkedValue: 'no'); //niet
-        $yesNoElement->setUseHiddenElement(false); //en
-
+        $yesNoElement->setUseHiddenElement(useHiddenElement: false); //en
 
         return $yesNoElement;
     }
@@ -141,16 +129,16 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
         }
 
         if ($facetField->getReverse()) {
-            $multiOptions = array_reverse($multiOptions);
+            $multiOptions = array_reverse(array: $multiOptions);
         }
 
         $facetElement = new MultiCheckbox();
-        $facetElement->setName('values');
-        $facetElement->setLabel($facetField->getName());
-        $facetElement->setValueOptions($multiOptions);
-        $facetElement->setLabelOption('escape', false);
-        $facetElement->setOption('inline', true);
-        $facetElement->setDisableInArrayValidator(true);
+        $facetElement->setName(name: 'values');
+        $facetElement->setLabel(label: $facetField->getName());
+        $facetElement->setValueOptions(options: $multiOptions);
+        $facetElement->setLabelOption(key: 'escape', value: false);
+        $facetElement->setOption(key: 'inline', value: true);
+        $facetElement->setDisableInArrayValidator(disableOption: true);
 
         return $facetElement;
     }
@@ -158,11 +146,10 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
     private function createAndOrFormElement(): Checkbox
     {
         $andOrElement = new Checkbox();
-        $andOrElement->setName('andOr');
-        $andOrElement->setLabel('txt-and-or');
+        $andOrElement->setName(name: 'andOr');
+        $andOrElement->setLabel(label: 'txt-and-or');
         $andOrElement->setCheckedValue(checkedValue: 'and'); //en
-        $andOrElement->setUseHiddenElement(false); //en
-
+        $andOrElement->setUseHiddenElement(useHiddenElement: false); //en
 
         return $andOrElement;
     }
@@ -177,15 +164,15 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
         $badges = [];
 
         if (null === $this->data) {
-            throw new RuntimeException("Form data is NULL, did you set the data");
+            throw new RuntimeException(message: "Form data is NULL, did you set the data");
         }
 
         if (!empty($this->data['query'])) {
             $badges[] = [
-                'type'           => 'search',
-                'query'          => $this->data['query'],
+                'type' => 'search',
+                'query' => $this->data['query'],
                 'facetArguments' => http_build_query(
-                    [
+                    data: [
                         'facet' => $this->data['facet'],
                     ]
                 ),
@@ -193,7 +180,7 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
         }
 
         foreach ($this->data['facet'] as $facetName => $facetData) {
-            $facetField = $this->searchService->getFacet($facetName);
+            $facetField = $this->searchService->getFacet(fieldName: $facetName);
 
             //Remaining facets are all facets wheren the current facet value is filtered out
             $remainingFacets = $this->data['facet'];
@@ -201,17 +188,17 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
             unset($remainingFacets[$facetName]);
 
             $badges[] = [
-                'type'           => 'facet',
-                'facetField'     => $facetField,
-                'name'           => $facetField->getName(),
-                'values'         => implode(
-                    $facetData['andOr'] ?? false ? ' and ' : ' or ',
-                    $facetData['values'] ?? []
+                'type' => 'facet',
+                'facetField' => $facetField,
+                'name' => $facetField->getName(),
+                'values' => implode(
+                        separator: $facetData['andOr'] ?? false ? ' and ' : ' or ',
+                    array: $facetData['values'] ?? []
                 ),
-                'hasValues'      => count($facetData['values'] ?? []) > 0,
-                'not'            => !(isset($facetData['yesNo']) && $facetData['yesNo'] === 'no'),
+                'hasValues' => count($facetData['values'] ?? []) > 0,
+                'not' => !(isset($facetData['yesNo']) && $facetData['yesNo'] === 'no'),
                 'facetArguments' => http_build_query(
-                    [
+                    data: [
                         'query' => $this->data['query'],
                         'facet' => $remainingFacets,
                     ]

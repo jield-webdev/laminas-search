@@ -33,6 +33,6 @@ class ProximityExpression extends Expression implements Stringable
 
     public function __toString(): string
     {
-        return Util::quote(implode(' ', $this->words)) . '~' . $this->proximity;
+        return Util::quote(value: implode(separator: ' ', array: $this->words)) . '~' . $this->proximity;
     }
 }

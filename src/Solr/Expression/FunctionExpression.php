@@ -23,7 +23,7 @@ class FunctionExpression extends Expression implements Stringable
         $parameters = $this->parameters ?: null;
 
         if ($parameters && !$parameters instanceof ParameterExpression) {
-            $parameters = new ParameterExpression($parameters);
+            $parameters = new ParameterExpression(parameters: $parameters);
         }
 
         return $this->function . '(' . $parameters . ')';

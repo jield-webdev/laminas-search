@@ -16,26 +16,26 @@ final class ListCores extends Command
 
     public function __construct(private readonly ConsoleService $consoleService)
     {
-        parent::__construct(self::$defaultName);
+        parent::__construct(name: self::$defaultName);
     }
 
     protected function configure(): void
     {
-        $this->setName(self::$defaultName);
+        $this->setName(name: self::$defaultName);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $output->writeln('<info>List of all cores in index</info>');
+        $output->writeln(messages: '<info>List of all cores in index</info>');
         $cores = $this->consoleService->getCores();
 
         foreach ($cores as $key => $core) {
             $output->writeln(
-                sprintf("Core for %s with service %s", $key, $core['service'])
+                messages: sprintf("Core for %s with service %s", $key, $core['service'])
             );
         }
 
-        $output->writeln(sprintf("<info>In total %d cores are active</info>", count($cores)));
+        $output->writeln(messages: sprintf("<info>In total %d cores are active</info>", count($cores)));
 
         return Command::SUCCESS;
     }

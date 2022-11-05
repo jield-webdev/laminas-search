@@ -6,7 +6,9 @@ use Jield\Search\Command\ListCores;
 use Jield\Search\Command\SyncIndex;
 use Jield\Search\Command\TestIndex;
 use Jield\Search\Command\UpdateIndex;
+use Jield\Search\Controller\Plugin\GetFilter;
 use Jield\Search\Factory\ConsoleServiceFactory;
+use Jield\Search\Factory\GetFilterFactory;
 use Jield\Search\Service\ConsoleService;
 use Laminas\ServiceManager\AbstractFactory\ConfigAbstractFactory;
 
@@ -19,6 +21,19 @@ final class ConfigProvider
             'service_manager' => $this->getServiceMangerConfig(),
             'laminas-cli' => $this->getCommandConfig(),
             'view_manager' => $this->getViewManagerConfig(),
+            'controller_plugins' => $this->getControllerPluginConfig(),
+        ];
+    }
+
+    public function getControllerPluginConfig(): array
+    {
+        return [
+            'aliases' => [
+                'getFilter' => GetFilter::class,
+            ],
+            'factories' => [
+                GetFilter::class => GetFilterFactory::class,
+            ],
         ];
     }
 

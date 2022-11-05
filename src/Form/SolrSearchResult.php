@@ -28,14 +28,14 @@ final class SolrSearchResult extends SearchFilter
         array $searchFields = []
     ) {
         parent::__construct();
-        $this->setAttribute('method', 'get');
-        $this->setAttribute('action', '');
-        $this->setAttribute('id', 'search');
+        $this->setAttribute(key: 'method', value: 'get');
+        $this->setAttribute(key: 'action', value: '');
+        $this->setAttribute(key: 'id', value: 'search');
 
         // Add the field selection
         if (!empty($searchFields)) {
             $this->add(
-                [
+                elementOrFieldset: [
                     'type' => MultiCheckbox::class,
                     'name' => 'fields',
                     'options' => [
@@ -52,30 +52,30 @@ final class SolrSearchResult extends SearchFilter
 
     public function createFacetFormElements(): void
     {
-        $facetFieldset = new Fieldset('facet');
+        $facetFieldset = new Fieldset(name: 'facet');
 
         foreach ($this->searchService->getFacets() as $facetField) {
-            $facetElementFieldset = new Fieldset($facetField->getField());
-            $field = $this->getFacetByFacetField($facetField->getField());
+            $facetElementFieldset = new Fieldset(name: $facetField->getField());
+            $field = $this->getFacetByFacetField(fieldName: $facetField->getField());
 
             if ($facetField->getHasYesNo()) {
-                $facetElementFieldset->add($this->createYesNoFormElement());
+                $facetElementFieldset->add(elementOrFieldset: $this->createYesNoFormElement());
             }
 
             $facetElementFieldset->add(
-                $this->createFacetFieldFormElement($field, $facetField)
+                elementOrFieldset: $this->createFacetFieldFormElement(field: $field, facetField: $facetField)
             );
 
             if ($facetField->getHasAndOr()) {
-                $facetElementFieldset->add($this->createAndOrFormElement());
+                $facetElementFieldset->add(elementOrFieldset: $this->createAndOrFormElement());
             }
 
-            if ((is_countable($field) ? count($field) : 0) > 0) {
-                $facetFieldset->add($facetElementFieldset);
+            if ((is_countable(value: $field) ? count($field) : 0) > 0) {
+                $facetFieldset->add(elementOrFieldset: $facetElementFieldset);
             }
         }
 
-        $this->add($facetFieldset);
+        $this->add(elementOrFieldset: $facetFieldset);
     }
 
     private function getFacetByFacetField(string $fieldName): FacetResultInterface
@@ -83,10 +83,10 @@ final class SolrSearchResult extends SearchFilter
         $facetSet = $this->searchService->getResultSet()->getFacetSet();
 
         if (null === $facetSet) {
-            throw new RuntimeException("This search has no facets");
+            throw new RuntimeException(message: "This search has no facets");
         }
 
-        $facetField = $this->searchService->getFacet($fieldName);
+        $facetField = $this->searchService->getFacet(fieldName: $fieldName);
 
         return $facetSet->getFacet($facetField->getField());
     }
@@ -113,19 +113,19 @@ final class SolrSearchResult extends SearchFilter
         }
 
         if ($facetField->getReverse()) {
-            $multiOptions = array_reverse($multiOptions);
+            $multiOptions = array_reverse(array: $multiOptions);
         }
 
         $facetElement = new MultiCheckbox();
-        $facetElement->setName('values');
-        $facetElement->setValue($facetField->getDefaultValue());
-        $facetElement->setLabel($facetField->getName());
-        $facetElement->setValueOptions($multiOptions);
-        $facetElement->setLabelOption('escape', false);
-        $facetElement->setLabelOption('disable_html_escape', true);
-        $facetElement->setOption('inline', true);
-        $facetElement->setOption('type', $facetField->getType());
-        $facetElement->setDisableInArrayValidator(true);
+        $facetElement->setName(name: 'values');
+        $facetElement->setValue(value: $facetField->getDefaultValue());
+        $facetElement->setLabel(label: $facetField->getName());
+        $facetElement->setValueOptions(options: $multiOptions);
+        $facetElement->setLabelOption(key: 'escape', value: false);
+        $facetElement->setLabelOption(key: 'disable_html_escape', value: true);
+        $facetElement->setOption(key: 'inline', value: true);
+        $facetElement->setOption(key: 'type', value: $facetField->getType());
+        $facetElement->setDisableInArrayValidator(disableOption: true);
 
         return $facetElement;
     }
@@ -133,10 +133,10 @@ final class SolrSearchResult extends SearchFilter
     private function createAndOrFormElement(): Checkbox
     {
         $andOrElement = new Checkbox();
-        $andOrElement->setName('andOr');
-        $andOrElement->setLabel('txt-and-or');
+        $andOrElement->setName(name: 'andOr');
+        $andOrElement->setLabel(label: 'txt-and-or');
         $andOrElement->setCheckedValue(checkedValue: 'and'); //en
-        $andOrElement->setUseHiddenElement(false); //en
+        $andOrElement->setUseHiddenElement(useHiddenElement: false); //en
 
 
         return $andOrElement;
@@ -156,7 +156,7 @@ final class SolrSearchResult extends SearchFilter
                 'type' => 'search',
                 'query' => $this->data['query'],
                 'facetArguments' => http_build_query(
-                    [
+                    data: [
                         'facet' => $this->data['facet'],
                     ]
                 ),
@@ -164,11 +164,11 @@ final class SolrSearchResult extends SearchFilter
         }
 
         foreach ($this->data['facet'] as $facetName => $facetData) {
-            $facetField = $this->searchService->getFacet($facetName);
+            $facetField = $this->searchService->getFacet(fieldName: $facetName);
 
             $values = $facetData['values'] ?? [];
 
-            if (is_string($values) && $facetField->isSlider()) {
+            if (is_string(value: $values) && $facetField->isSlider()) {
                 $values = array_map(callback: 'intval', array: explode(separator: ',', string: $values));
                 $valueText = sprintf('BETWEEN %s and %s', $values[0] ?? '', $values[1] ?? '');
             } elseif ($facetField->isCheckboxMin()) {
@@ -190,10 +190,10 @@ final class SolrSearchResult extends SearchFilter
                 'facetField' => $facetField,
                 'name' => $facetField->getName(),
                 'values' => $valueText,
-                'hasValues' => (is_countable($values) ? count($values) : 0) > 0,
+                'hasValues' => (is_countable(value: $values) ? count($values) : 0) > 0,
                 'not' => !(isset($facetData['yesNo']) && $facetData['yesNo'] === 'no'),
                 'facetArguments' => http_build_query(
-                    [
+                    data: [
                         'query' => $this->data['query'],
                         'facet' => $remainingFacets,
                     ]

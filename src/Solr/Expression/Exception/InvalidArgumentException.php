@@ -19,12 +19,12 @@ class InvalidArgumentException extends BaseInvalidArgumentException implements E
         $expectations = (array)$expectation;
 
         return new self(
-            sprintf(
+            message: sprintf(
                 'Invalid argument #%d $%s given: expected %s, got %s',
                 $position,
                 $name,
-                self::formatExpectations($expectations),
-                self::getType($actual)
+                self::formatExpectations(expectations: $expectations),
+                self::getType(actual: $actual)
             )
         );
     }
@@ -32,17 +32,17 @@ class InvalidArgumentException extends BaseInvalidArgumentException implements E
     /** @param string[] $expectations */
     private static function formatExpectations(array $expectations): string
     {
-        $last = array_pop($expectations);
+        $last = array_pop(array: $expectations);
 
         if (!$expectations) {
             return $last;
         }
 
-        return implode(', ', $expectations) . ' or ' . $last;
+        return implode(separator: ', ', array: $expectations) . ' or ' . $last;
     }
 
     private static function getType(mixed $actual): string
     {
-        return is_object($actual) ? $actual::class : gettype($actual);
+        return is_object(value: $actual) ? $actual::class : gettype($actual);
     }
 }

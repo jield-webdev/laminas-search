@@ -39,8 +39,8 @@ class RangeExpression extends Expression implements Stringable
         return sprintf(
             '%s%s TO %s%s',
             $this->inclusive ? '[' : '{',
-            $this->cast($this->start),
-            $this->cast($this->end),
+            $this->cast(value: $this->start),
+            $this->cast(value: $this->end),
             $this->inclusive ? ']' : '}'
         );
     }
@@ -50,6 +50,6 @@ class RangeExpression extends Expression implements Stringable
      */
     private function cast($value): ExpressionInterface|string
     {
-        return $value === null ? '*' : Util::sanitize($value);
+        return $value === null ? '*' : Util::sanitize(value: $value);
     }
 }

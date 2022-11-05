@@ -30,18 +30,18 @@ class WildcardExpression extends Expression implements Stringable
     public function __toString(): string
     {
         if ($this->prefix instanceof PhraseExpression) {
-            $prefix = substr($this->prefix, 0, -1);
+            $prefix = substr(string: $this->prefix, offset: 0, length: -1);
             $phrasePrefix = true;
         } else {
-            $prefix = Util::escape($this->prefix);
+            $prefix = Util::escape(value: $this->prefix);
             $phrasePrefix = false;
         }
 
         if ($this->suffix instanceof PhraseExpression) {
-            $suffix = substr($this->suffix, 1);
+            $suffix = substr(string: $this->suffix, offset: 1);
             $phraseSuffix = true;
         } else {
-            $suffix = Util::escape($this->suffix);
+            $suffix = Util::escape(value: $this->suffix);
             $phraseSuffix = false;
         }
 

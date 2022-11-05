@@ -33,17 +33,17 @@ class DateTimeExpression extends Expression implements Stringable
 
         if ($this->timezone === 'UTC') {
             if (!self::$utcTimezone) {
-                self::$utcTimezone = new DateTimeZone('UTC');
+                self::$utcTimezone = new DateTimeZone(timezone: 'UTC');
             }
-            $date = $date->setTimeZone(self::$utcTimezone);
+            $date = $date->setTimeZone(timezone: self::$utcTimezone);
         } elseif ($this->timezone !== null) {
             if ($this->timezone instanceof DateTimeZone) {
-                $date = $date->setTimeZone($this->timezone);
+                $date = $date->setTimeZone(timezone: $this->timezone);
             } else {
-                $date = $date->setTimeZone(new DateTimeZone($this->timezone));
+                $date = $date->setTimeZone(timezone: new DateTimeZone(timezone: $this->timezone));
             }
         }
 
-        return $date->format($this->format);
+        return $date->format(format: $this->format);
     }
 }

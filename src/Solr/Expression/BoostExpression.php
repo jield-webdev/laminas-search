@@ -21,14 +21,14 @@ class BoostExpression extends Expression implements Stringable
      */
     #[Pure] public function __construct(private readonly float $boost, $expr)
     {
-        $expr = Util::escape($expr);
+        $expr = Util::escape(value: $expr);
 //        $expr = trim($expr);
 
-        parent::__construct($expr);
+        parent::__construct(expr: $expr);
     }
 
     public function __toString(): string
     {
-        return Util::sanitize($this->expr) . '^' . $this->boost;
+        return Util::sanitize(value: $this->expr) . '^' . $this->boost;
     }
 }

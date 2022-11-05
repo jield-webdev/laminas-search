@@ -23,13 +23,13 @@ class FieldExpression extends Expression implements Stringable
      */
     #[Pure] public function __construct(private $field, $expr)
     {
-        parent::__construct($expr);
+        parent::__construct(expr: $expr);
     }
 
     public function __toString(): string
     {
-        $field      = Util::escape($this->field);
-        $expression = Util::sanitize($this->expr);
+        $field      = Util::escape(value: $this->field);
+        $expression = Util::sanitize(value: $this->expr);
 
         if ($this->expr instanceof LocalParamsExpression) {
             return $expression . $field;

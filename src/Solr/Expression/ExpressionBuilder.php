@@ -40,8 +40,12 @@ class ExpressionBuilder
      */
     public function setDefaultTimezone(DateTimeZone|string $timezone): void
     {
-        if (!is_string($timezone) && !is_object($timezone)) {
-            throw InvalidArgumentException::invalidArgument(1, 'timezone', ['string', DateTimeZone::class], $timezone);
+        if (!is_string(value: $timezone) && !is_object(value: $timezone)) {
+            throw InvalidArgumentException::invalidArgument(
+                position: 1,
+                name: 'timezone',
+                expectation: ['string', DateTimeZone::class],
+                actual: $timezone);
         }
 
         $this->defaultTimezone = $timezone;
@@ -52,16 +56,16 @@ class ExpressionBuilder
      */
     #[Pure] public function phrase(?string $str): ?ExpressionInterface
     {
-        if ($this->ignore($str)) {
+        if ($this->ignore(expr: $str)) {
             return null;
         }
 
-        return new PhraseExpression($str);
+        return new PhraseExpression(expr: $str);
     }
 
     private function ignore(mixed $expr): bool
     {
-        return $expr === null || (is_string($expr) && trim($expr) === '');
+        return $expr === null || (is_string(value: $expr) && trim(string: $expr) === '');
     }
 
     /**
@@ -71,11 +75,11 @@ class ExpressionBuilder
      */
     #[Pure] public function boost($expr, ?float $boost): ?ExpressionInterface
     {
-        if ($this->ignore($expr) or $this->ignore($boost)) {
+        if ($this->ignore(expr: $expr) or $this->ignore(expr: $boost)) {
             return null;
         }
 
-        return new BoostExpression($boost, $expr);
+        return new BoostExpression(boost: $boost, expr: $expr);
     }
 
     /**
@@ -86,15 +90,15 @@ class ExpressionBuilder
     public function prx(ExpressionInterface|string|null $word = null, $proximity = null): ?ExpressionInterface
     {
         $arguments = func_get_args();
-        $proximityElement = array_pop($arguments);
+        $proximityElement = array_pop(array: $arguments);
 
-        $arguments = $this->flatten($arguments);
+        $arguments = $this->flatten(collection: $arguments);
 
         if (!$arguments) {
             return null;
         }
 
-        return new ProximityExpression($arguments, $proximityElement);
+        return new ProximityExpression(words: $arguments, proximity: $proximityElement);
     }
 
     private function flatten($collection): array
@@ -103,9 +107,9 @@ class ExpressionBuilder
         $result = [];
 
         while (!empty($stack)) {
-            $item = array_shift($stack);
+            $item = array_shift(array: $stack);
 
-            if (is_iterable($item)) {
+            if (is_iterable(value: $item)) {
                 foreach ($item as $element) {
                     array_unshift($stack, $element);
                 }
@@ -125,11 +129,11 @@ class ExpressionBuilder
      */
     #[Pure] public function fzz($expr, ?float $similarity = null): ?ExpressionInterface
     {
-        if ($this->ignore($expr)) {
+        if ($this->ignore(expr: $expr)) {
             return null;
         }
 
-        return new FuzzyExpression($expr, $similarity);
+        return new FuzzyExpression(expr: $expr, similarity: $similarity);
     }
 
     /**
@@ -139,7 +143,7 @@ class ExpressionBuilder
         ExpressionInterface|float|int|string|null $start = null,
         ExpressionInterface|float|int|string|null $end = null
     ): ExpressionInterface {
-        return new RangeExpression($start, $end, false);
+        return new RangeExpression(start: $start, end: $end, inclusive: false);
     }
 
     /**
@@ -151,19 +155,19 @@ class ExpressionBuilder
         ?string $wildcard = '*',
         ExpressionInterface|string $suffix = '*'
     ): ?ExpressionInterface {
-        $wildcard = strtolower((string)$wildcard);
+        $wildcard = strtolower(string: (string)$wildcard);
         //$wildcard = str_replace(' ', '\ ', $wildcard);
 
-        $wildcard = Util::escape($wildcard);
+        $wildcard = Util::escape(value: $wildcard);
 //        $wildcard = Util::sanitize($wildcard);
 
         $prefix = '*';
 
-        if (($this->ignore($prefix) && $this->ignore($suffix)) || $this->ignore($wildcard)) {
+        if (($this->ignore(expr: $prefix) && $this->ignore(expr: $suffix)) || $this->ignore(expr: $wildcard)) {
             return null;
         }
 
-        return new WildcardExpression($wildcard, $prefix, $suffix);
+        return new WildcardExpression(wildcard: $wildcard, prefix: $prefix, suffix: $suffix);
     }
 
     /**
@@ -175,11 +179,11 @@ class ExpressionBuilder
      */
     #[Pure] public function not($expr): BooleanExpression|ExpressionInterface|null
     {
-        if ($this->ignore($expr)) {
+        if ($this->ignore(expr: $expr)) {
             return null;
         }
 
-        return new BooleanExpression(BooleanExpression::OPERATOR_PROHIBITED, $expr, true);
+        return new BooleanExpression(operator: BooleanExpression::OPERATOR_PROHIBITED, expr: $expr, useNotNotation: true);
     }
 
     /**
@@ -202,9 +206,9 @@ class ExpressionBuilder
         }
 
         if ($operator) {
-            return $this->req($expr);
+            return $this->req(expr: $expr);
         } else {
-            return $this->prhb($expr);
+            return $this->prhb(expr: $expr);
         }
     }
 
@@ -216,11 +220,11 @@ class ExpressionBuilder
      */
     #[Pure] public function req($expr): BooleanExpression|ExpressionInterface|null
     {
-        if ($this->ignore($expr)) {
+        if ($this->ignore(expr: $expr)) {
             return null;
         }
 
-        return new BooleanExpression(BooleanExpression::OPERATOR_REQUIRED, $expr);
+        return new BooleanExpression(operator: BooleanExpression::OPERATOR_REQUIRED, expr: $expr);
     }
 
     /**
@@ -231,11 +235,11 @@ class ExpressionBuilder
      */
     #[Pure] public function prhb($expr): BooleanExpression|ExpressionInterface|null
     {
-        if ($this->ignore($expr)) {
+        if ($this->ignore(expr: $expr)) {
             return null;
         }
 
-        return new BooleanExpression(BooleanExpression::OPERATOR_PROHIBITED, $expr);
+        return new BooleanExpression(operator: BooleanExpression::OPERATOR_PROHIBITED, expr: $expr);
     }
 
     /**
@@ -245,13 +249,13 @@ class ExpressionBuilder
      */
     public function andX(...$args): ?ExpressionInterface
     {
-        $args = $this->parseCompositeArgs($args)[0];
+        $args = $this->parseCompositeArgs(args: $args)[0];
 
         if (!$args) {
             return null;
         }
 
-        return new GroupExpression($args, GroupExpression::TYPE_AND);
+        return new GroupExpression(expressions: $args, type: GroupExpression::TYPE_AND);
     }
 
     /**
@@ -260,14 +264,14 @@ class ExpressionBuilder
      */
     private function parseCompositeArgs(array $args): array
     {
-        $args = $this->flatten($args);
+        $args = $this->flatten(collection: $args);
         $type = CompositeExpression::TYPE_SPACE;
 
-        if (CompositeExpression::isValidType(end($args))) {
-            $type = array_pop($args);
+        if (CompositeExpression::isValidType(type: end(array: $args))) {
+            $type = array_pop(array: $args);
         }
 
-        $args = array_filter($args, $this->permit(...));
+        $args = array_filter(array: $args, callback: $this->permit(...));
 
         if (!$args) {
             return [false, $type];
@@ -283,13 +287,13 @@ class ExpressionBuilder
      */
     public function orX(...$args): ?ExpressionInterface
     {
-        $args = $this->parseCompositeArgs($args)[0];
+        $args = $this->parseCompositeArgs(args: $args)[0];
 
         if (!$args) {
             return null;
         }
 
-        return new GroupExpression($args, GroupExpression::TYPE_OR);
+        return new GroupExpression(expressions: $args, type: GroupExpression::TYPE_OR);
     }
 
     /**
@@ -299,16 +303,16 @@ class ExpressionBuilder
      */
     public function all($expr = null): mixed
     {
-        if ($this->permit($expr)) {
+        if ($this->permit(expr: $expr)) {
             return $expr;
         }
 
-        return $this->field($this->lit('*'), $this->lit('*'));
+        return $this->field(field: $this->lit(expr: '*'), expr: $this->lit(expr: '*'));
     }
 
     #[Pure] private function permit(mixed $expr): bool
     {
-        return !$this->ignore($expr);
+        return !$this->ignore(expr: $expr);
     }
 
     /**
@@ -319,13 +323,13 @@ class ExpressionBuilder
         ExpressionInterface|string $field,
         array|ExpressionInterface|string|null|int|bool $expr
     ): ?ExpressionInterface {
-        if (is_array($expr)) {
-            $expr = $this->grp($expr);
-        } elseif ($this->ignore($expr)) {
+        if (is_array(value: $expr)) {
+            $expr = $this->grp(expr: $expr);
+        } elseif ($this->ignore(expr: $expr)) {
             return null;
         }
 
-        return new FieldExpression($field, $expr);
+        return new FieldExpression(field: $field, expr: $expr);
     }
 
     /**
@@ -340,7 +344,7 @@ class ExpressionBuilder
             return null;
         }
 
-        return new GroupExpression($expr, $type);
+        return new GroupExpression(expressions: $expr, type: $type);
     }
 
     /**
@@ -350,20 +354,20 @@ class ExpressionBuilder
      */
     #[Pure] public function lit($expr): ?ExpressionInterface
     {
-        if ($this->ignore($expr)) {
+        if ($this->ignore(expr: $expr)) {
             return null;
         }
 
-        return new Expression($expr);
+        return new Expression(expr: $expr);
     }
 
     #[Pure] public function number($field, $expr): ?ExpressionInterface
     {
-        if (!is_numeric($expr)) {
+        if (!is_numeric(value: $expr)) {
             return null;
         }
 
-        return new FieldExpression($field, $this->eq($expr));
+        return new FieldExpression(field: $field, expr: $this->eq(expr: $expr));
     }
 
     /**
@@ -373,7 +377,7 @@ class ExpressionBuilder
      */
     #[Pure] public function eq($expr): ?ExpressionInterface
     {
-        if ($this->ignore($expr)) {
+        if ($this->ignore(expr: $expr)) {
             return null;
         }
 
@@ -381,7 +385,7 @@ class ExpressionBuilder
             return $expr;
         }
 
-        return new PhraseExpression($expr);
+        return new PhraseExpression(expr: $expr);
     }
 
     /**
@@ -395,7 +399,7 @@ class ExpressionBuilder
             return null;
         }
 
-        return $this->range($this->startOfDay($date), $this->endOfDay($date));
+        return $this->range(start: $this->startOfDay(date: $date), end: $this->endOfDay(date: $date));
     }
 
     /**
@@ -406,7 +410,7 @@ class ExpressionBuilder
         ExpressionInterface|float|int|string|null $end = null,
         bool $inclusive = true
     ): ExpressionInterface {
-        return new RangeExpression($start, $end, $inclusive);
+        return new RangeExpression(start: $start, end: $end, inclusive: $inclusive);
     }
 
     /**
@@ -419,9 +423,9 @@ class ExpressionBuilder
         }
 
         return new DateTimeExpression(
-            $date,
-            DateTimeExpression::FORMAT_START_OF_DAY,
-            $timezone === false ? $this->defaultTimezone : $timezone
+            date: $date,
+            format: DateTimeExpression::FORMAT_START_OF_DAY,
+            timezone: $timezone === false ? $this->defaultTimezone : $timezone
         );
     }
 
@@ -435,9 +439,9 @@ class ExpressionBuilder
         }
 
         return new DateTimeExpression(
-            $date,
-            DateTimeExpression::FORMAT_END_OF_DAY,
-            $timezone === false ? $this->defaultTimezone : $timezone
+            date: $date,
+            format: DateTimeExpression::FORMAT_END_OF_DAY,
+            timezone: $timezone === false ? $this->defaultTimezone : $timezone
         );
     }
 
@@ -455,22 +459,22 @@ class ExpressionBuilder
         }
 
         return $this->range(
-            $this->lit($this->date($from, $timezone)),
-            $this->lit($this->date($to, $timezone)),
-            $inclusive
+            start: $this->lit(expr: $this->date(date: $from, timezone: $timezone)),
+            end: $this->lit(expr: $this->date(date: $to, timezone: $timezone)),
+            inclusive: $inclusive
         );
     }
 
     #[Pure] public function date(?DateTime $date = null, bool|string $timezone = false): ExpressionInterface
     {
         if ($date === null) {
-            return $this->lit('*');
+            return $this->lit(expr: '*');
         }
 
         return new DateTimeExpression(
-            $date,
-            DateTimeExpression::FORMAT_DEFAULT,
-            $timezone === false ? $this->defaultTimezone : $timezone
+            date: $date,
+            format: DateTimeExpression::FORMAT_DEFAULT,
+            timezone: $timezone === false ? $this->defaultTimezone : $timezone
         );
     }
 
@@ -483,7 +487,7 @@ class ExpressionBuilder
      */
     #[Pure] public function func(string $function, $parameters = null): ExpressionInterface
     {
-        return new FunctionExpression($function, $parameters);
+        return new FunctionExpression(function: $function, parameters: $parameters);
     }
 
     /**
@@ -491,9 +495,9 @@ class ExpressionBuilder
      */
     public function params(mixed ...$parameters): ExpressionInterface
     {
-        $parameters = $this->flatten($parameters);
+        $parameters = $this->flatten(collection: $parameters);
 
-        return new ParameterExpression($parameters);
+        return new ParameterExpression(parameters: $parameters);
     }
 
     /**
@@ -504,19 +508,21 @@ class ExpressionBuilder
     {
         $additional = null;
 
-        if (!is_bool($shortForm)) {
+        if (!is_bool(value: $shortForm)) {
             $additional = $shortForm;
             $shortForm = true;
-        } elseif (!is_array($params)) {
+        } elseif (!is_array(value: $params)) {
             $additional = $params;
             $params = [];
         }
 
         if ($additional !== null) {
-            return $this->comp(new LocalParamsExpression($type, $params, $shortForm), $additional);
+            return $this->comp(
+                expr: new LocalParamsExpression(type: $type, params: $params, shortForm: $shortForm),
+                type: $additional);
         }
 
-        return new LocalParamsExpression($type, $params, $shortForm);
+        return new LocalParamsExpression(type: $type, params: $params, shortForm: $shortForm);
     }
 
     /**
@@ -526,13 +532,13 @@ class ExpressionBuilder
      */
     public function comp($expr = null, ?string $type = CompositeExpression::TYPE_SPACE): ?ExpressionInterface
     {
-        [$args, $type] = $this->parseCompositeArgs(func_get_args());
+        [$args, $type] = $this->parseCompositeArgs(args: func_get_args());
 
         if (!$args) {
             return null;
         }
 
-        return new CompositeExpression($args, $type);
+        return new CompositeExpression(expressions: $args, type: $type);
     }
 
     /** @param mixed[] $additionalParams */
@@ -542,7 +548,11 @@ class ExpressionBuilder
         ?int $distance = null,
         array $additionalParams = []
     ): ExpressionInterface {
-        return new GeofiltExpression($field, $geolocation, $distance, $additionalParams);
+        return new GeofiltExpression(
+            field: $field,
+            geolocation: $geolocation,
+            distance: $distance,
+            additionalParams: $additionalParams);
     }
 
     /**
@@ -550,41 +560,41 @@ class ExpressionBuilder
      */
     #[Pure] public function latLong(float $latitude, float $longitude, int $precision = 12): ExpressionInterface
     {
-        return new GeolocationExpression($latitude, $longitude, $precision);
+        return new GeolocationExpression(latitude: $latitude, longitude: $longitude, precision: $precision);
     }
 
     /** @param string|ExpressionInterface|null $expr */
     public function noCache($expr = null): ?ExpressionInterface
     {
-        if ($this->ignore($expr)) {
+        if ($this->ignore(expr: $expr)) {
             return null;
         }
 
-        return $this->comp([$this->shortLocalParams('cache', false), $expr], null);
+        return $this->comp(expr: [$this->shortLocalParams(tag: 'cache', value: false), $expr], type: null);
     }
 
     #[Pure] private function shortLocalParams(ExpressionInterface|string $tag, mixed $value): LocalParamsExpression
     {
-        return new LocalParamsExpression($tag, [$tag => $value], true);
+        return new LocalParamsExpression(type: $tag, params: [$tag => $value], shortForm: true);
     }
 
     /** @param string|ExpressionInterface|null $expr */
     public function tag(string $tagName, $expr = null): ?ExpressionInterface
     {
-        if ($this->ignore($expr)) {
+        if ($this->ignore(expr: $expr)) {
             return null;
         }
 
-        return $this->comp([$this->shortLocalParams('tag', $tagName), $expr], null);
+        return $this->comp(expr: [$this->shortLocalParams(tag: 'tag', value: $tagName), $expr], type: null);
     }
 
     /** @param string|ExpressionInterface|null $expr */
     public function excludeTag(string $tagName, $expr = null): ?ExpressionInterface
     {
-        if ($this->ignore($expr)) {
+        if ($this->ignore(expr: $expr)) {
             return null;
         }
 
-        return $this->comp([$this->shortLocalParams('ex', $tagName), $expr], null);
+        return $this->comp(expr: [$this->shortLocalParams(tag: 'ex', value: $tagName), $expr], type: null);
     }
 }

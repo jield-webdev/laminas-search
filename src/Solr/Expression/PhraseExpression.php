@@ -16,6 +16,6 @@ class PhraseExpression extends Expression implements Stringable
 {
     public function __toString(): string
     {
-        return Util::quote($this->expr);
+        return Util::quote(value: $this->expr);
     }
 }

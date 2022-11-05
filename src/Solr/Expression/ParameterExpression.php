@@ -20,13 +20,13 @@ class ParameterExpression extends Expression implements Stringable
 
     public function __toString(): string
     {
-        $parameters = array_map($this->replaceNull(...), $this->parameters);
+        $parameters = array_map(callback: $this->replaceNull(...), array: $this->parameters);
 
-        return implode(', ', array_map(Util::sanitize(...), $parameters));
+        return implode(separator: ', ', array: array_map(callback: Util::sanitize(...), array: $parameters));
     }
 
     #[Pure] private function replaceNull(mixed $value): mixed
     {
-        return $value ?? new PhraseExpression('');
+        return $value ?? new PhraseExpression(expr: '');
     }
 }

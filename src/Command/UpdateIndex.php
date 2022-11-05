@@ -19,37 +19,37 @@ final class UpdateIndex extends Command
 
     public function __construct(private readonly ConsoleService $consoleService)
     {
-        parent::__construct(self::$defaultName);
+        parent::__construct(name: self::$defaultName);
     }
 
     protected function configure(): void
     {
-        $this->setName(self::$defaultName);
-        $this->addOption('reset', 'r', InputOption::VALUE_NONE, 'Reset index');
+        $this->setName(name: self::$defaultName);
+        $this->addOption(name: 'reset', shortcut: 'r', mode: InputOption::VALUE_NONE, description: 'Reset index');
 
-        $cores = implode(', ', array_merge(array_keys($this->consoleService->getCores()), ['all']));
+        $cores = implode(separator: ', ', array: array_merge(array_keys(array: $this->consoleService->getCores()), ['all']));
 
         $this->addArgument(
-            'index',
-            InputOption::VALUE_REQUIRED,
-            $cores,
-            'all'
+            name: 'index',
+            mode: InputOption::VALUE_REQUIRED,
+            description: $cores,
+            default: 'all'
         );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $index = $input->getArgument('index');
-        $reset = $input->getOption('reset');
+        $index = $input->getArgument(name: 'index');
+        $reset = $input->getOption(name: 'reset');
 
         $startMessage = sprintf("<info>%s the index of %s</info>", $reset ? 'Reset' : 'Update', $index);
         $endMessage = sprintf("<info>%s the index of %s completed</info>", $reset ? 'Reset' : 'Update', $index);
 
-        $output->writeln($startMessage);
+        $output->writeln(messages: $startMessage);
 
         $this->consoleService->resetIndex(output: $output, index: $index, clearIndex: $reset);
 
-        $output->writeln($endMessage);
+        $output->writeln(messages: $endMessage);
 
         return Command::SUCCESS;
     }

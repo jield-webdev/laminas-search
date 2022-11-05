@@ -39,7 +39,7 @@ class CompositeExpression extends Expression implements Stringable
                 continue;
             }
 
-            $parts[] = Util::sanitize($expression);
+            $parts[] = Util::sanitize(value: $expression);
         }
 
         if (!$parts) {
@@ -52,7 +52,7 @@ class CompositeExpression extends Expression implements Stringable
             $glue = $this->type;
         }
 
-        return implode($glue, array_filter($parts));
+        return implode(separator: $glue, array: array_filter(array: $parts));
     }
 
     public static function isValidType(?string $type): bool
