@@ -293,8 +293,19 @@ abstract class AbstractSearchService implements SearchServiceInterface
         HasSearchInterface $entity,
         array $criteria = []
     ): void {
-        $searchIndexIds = $this->findAllIdsFromSearchIndex(entity: $entity);
         $databaseIds = $this->findAllIdsFromDatabase(entity: $entity, criteria: $criteria);
+
+        if (count($databaseIds) > 50000) {
+            $output->writeln(
+                sprintf(
+                    '<error>Too many items to check (%d), please use the update command</error>',
+                    count($databaseIds)
+                )
+            );
+            return;
+        }
+
+        $searchIndexIds = $this->findAllIdsFromSearchIndex(entity: $entity);
 
         $toBeDeletedItemsInSearchIndex = array_diff($searchIndexIds, $databaseIds);
 
@@ -399,8 +410,19 @@ abstract class AbstractSearchService implements SearchServiceInterface
         HasSearchInterface $entity,
         array $criteria = []
     ): void {
-        $searchIndexIds = $this->findAllIdsFromSearchIndex(entity: $entity);
         $databaseIds = $this->findAllIdsFromDatabase(entity: $entity, criteria: $criteria);
+
+        if (count($databaseIds) > 50000) {
+            $output->writeln(
+                sprintf(
+                    '<error>Too many items to check (%d), please use the update command</error>',
+                    count($databaseIds)
+                )
+            );
+            return;
+        }
+
+        $searchIndexIds = $this->findAllIdsFromSearchIndex(entity: $entity);
 
         $toBeAddedItemsInSearchIndex = array_diff($databaseIds, $searchIndexIds);
 
