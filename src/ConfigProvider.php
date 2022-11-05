@@ -2,11 +2,11 @@
 
 namespace Jield\Search;
 
-use Application\Factory\ConsoleServiceFactory;
 use Jield\Search\Command\ListCores;
 use Jield\Search\Command\SyncIndex;
 use Jield\Search\Command\TestIndex;
 use Jield\Search\Command\UpdateIndex;
+use Jield\Search\Factory\ConsoleServiceFactory;
 use Jield\Search\Service\ConsoleService;
 use Laminas\ServiceManager\AbstractFactory\ConfigAbstractFactory;
 

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Application\Factory;
+namespace Jield\Search\Factory;
 
+use Jield\Search\Service\ConsoleService;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerInterface;
-use Jield\Search\Service\ConsoleService;
 
 final class ConsoleServiceFactory implements FactoryInterface
 {
