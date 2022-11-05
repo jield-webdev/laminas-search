@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Jield\Search\Document;
 
 use Jield\Search\Entity\HasSearchInterface;
-use Solarium\Core\Query\DocumentInterface;
+use Solarium\QueryType\Update\Query\Document;
 
 interface DocumentHelperInterface
 {
-    public function getDocument(DocumentInterface $document, HasSearchInterface $entity): DocumentInterface;
+    public function getDocument(Document $document, HasSearchInterface $entity): Document;
 }
