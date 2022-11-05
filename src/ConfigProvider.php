@@ -2,13 +2,13 @@
 
 namespace Jield\Search;
 
+use Application\Factory\ConsoleServiceFactory;
 use Jield\Search\Command\ListCores;
 use Jield\Search\Command\SyncIndex;
 use Jield\Search\Command\TestIndex;
 use Jield\Search\Command\UpdateIndex;
 use Jield\Search\Service\ConsoleService;
 use Laminas\ServiceManager\AbstractFactory\ConfigAbstractFactory;
-use Laminas\ServiceManager\Factory\InvokableFactory;
 
 final class ConfigProvider
 {
@@ -51,7 +51,7 @@ final class ConfigProvider
                 SyncIndex::class => ConfigAbstractFactory::class,
                 TestIndex::class => ConfigAbstractFactory::class,
                 ListCores::class => ConfigAbstractFactory::class,
-                ConsoleService::class => InvokableFactory::class,
+                ConsoleService::class => ConsoleServiceFactory::class,
             ],
         ];
     }
