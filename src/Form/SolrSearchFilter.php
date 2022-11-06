@@ -29,7 +29,7 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
         bool $hasDateInterval = false
     ) {
         parent::__construct();
-        
+
         $this->setAttribute(key: 'method', value: $method);
         $this->setAttribute(key: 'action', value: '');
 
@@ -39,7 +39,7 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
                     'type' => Text::class,
                     'name' => 'dateInterval',
                     'options' => [
-                        'isDateRange' => true,
+                        'is-date-range' => true,
                         'label' => _('txt-date-interval'),
                     ],
                 ]
@@ -192,7 +192,7 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
                 'facetField' => $facetField,
                 'name' => $facetField->getName(),
                 'values' => implode(
-                        separator: $facetData['andOr'] ?? false ? ' and ' : ' or ',
+                    separator: $facetData['andOr'] ?? false ? ' and ' : ' or ',
                     array: $facetData['values'] ?? []
                 ),
                 'hasValues' => count($facetData['values'] ?? []) > 0,
