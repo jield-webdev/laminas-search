@@ -300,7 +300,7 @@ abstract class AbstractSearchService implements SearchServiceInterface
 
     private function findAllIdsFromDatabase(HasSearchInterface $entity, array $criteria): array
     {
-        $results = $this->entityManager->getRepository(className: $entity::class)->findBy(
+        $results = $this->entityManager->getRepository($entity::class)->findBy(
             criteria: $criteria,
             orderBy: ['id' => Criteria::ASC]);
 
@@ -315,12 +315,12 @@ abstract class AbstractSearchService implements SearchServiceInterface
 
     protected function findCount(string $entity, array $criteria): int
     {
-        return $this->entityManager->getRepository(className: $entity)->count(criteria: $criteria);
+        return $this->entityManager->getRepository($entity)->count(criteria: $criteria);
     }
 
     protected function findSliced(string $entity, int $limit, int $offset, array $criteria = []): array
     {
-        return $this->entityManager->getRepository(className: $entity)->findBy(
+        return $this->entityManager->getRepository($entity)->findBy(
             criteria: $criteria,
             orderBy: [],
             limit: $limit,
@@ -394,7 +394,7 @@ abstract class AbstractSearchService implements SearchServiceInterface
 
         $update = $this->getSolrClient()->createUpdate();
         foreach ($toBeAddedItemsInSearchIndex as $newId) {
-            $entity = $this->entityManager->getRepository(className: $entity::class)->find(id: $newId);
+            $entity = $this->entityManager->getRepository($entity::class)->find(id: $newId);
             $document = $this->getSearchDocumentFromEntity(update: $update, entity: $entity);
 
             $update->addDocument(document: $document);
