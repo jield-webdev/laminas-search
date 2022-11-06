@@ -35,6 +35,7 @@ final class GetFilter extends AbstractPlugin
         /** @var Request $request */
         $request = $application->getMvcEvent()->getRequest();
 
+
         //Initiate the filter
         $this->filter = new SearchFormResult(
             order: $request->getQuery(name: 'order', default: 'default'),
@@ -112,6 +113,20 @@ final class GetFilter extends AbstractPlugin
     public function getEncodedFilter(): ?string
     {
         return urlencode(string: $this->filter->getHash());
+    }
+
+    public function setFacetByKey(string $facetKey, array|string $value): void
+    {
+        if ($this->request->getQuery('query') === null) {
+            $this->filter->setFacetByKey($facetKey, $value);
+        }
+    }
+
+    public function setFilterByKey(string $filterKey, array|string|int $value): void
+    {
+        if ($this->request->getQuery('query') === null) {
+            $this->filter->setFilterByKey($filterKey, $value);
+        }
     }
 
     public function parseFilteredSortQuery(array $removeParams = []): string
