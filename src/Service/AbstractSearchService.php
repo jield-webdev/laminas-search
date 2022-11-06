@@ -499,20 +499,46 @@ abstract class AbstractSearchService implements SearchServiceInterface
         bool $exclude = false,
         bool $and = false,
     ): void {
-        if (is_string(value: $value)) {
-            $value = sprintf('"%s"', $value);
+        $facetField = $this->getFacet($field);
+
+        switch (true) {
+            case $facetField->isCheckboxMin():
+                //Take the last element of the array
+                $value = $value[0] ?? '';
+                $query = sprintf('%s%s:[%d TO *]', $exclude ? '-' : '', $field, $value);
+                break;
+            case !$facetField->isSlider():
+                if (is_string($value)) {
+                    $value = sprintf('"%s"', $value);
+                }
+
+                if (is_array($value)) {
+                    $value = array_map(static fn(string $value) => sprintf('"%s"', $value), $value);
+
+                    $value = implode(' ', $value);
+                }
+
+                $query = sprintf('%s%s:(%s)', $exclude ? '-' : '', $field, $value);
+                break;
+            default:
+                $values = explode(',', $value);
+                $min = $values[0] ?? '';
+                $max = $values[1] ?? '';
+
+                //@todo; this fields a bit sloppy
+                if (str_contains(haystack: $field, needle: 'array_int')) {
+                    $minField = str_replace(search: 'array_int', replace: 'min', subject: $field);
+                    $maxField = str_replace(search: 'array_int', replace: 'max', subject: $field);
+
+                    $query = sprintf('%s:[* TO %d] AND %s:[%d TO *]', $minField, $min, $maxField, $max);
+                } else {
+                    $query = sprintf('%s:[%d TO %d]', $field, $min, $max);
+                }
+                break;
         }
 
-        if (is_array(value: $value)) {
-            $value = array_map(callback: static fn(string $value) => sprintf('"%s"', $value), array: $value);
-
-            $value = implode(separator: ' ', array: $value);
-        }
-
-        $query = sprintf('%s%s:(%s)', $exclude ? '-' : '', $field, $value);
-
-        $this->query->createFilterQuery(options: $key . $field)->setQuery(query: $query)->getLocalParameters()->addTags(
-            tags: [$this->getFacet(fieldName: $field)->getField()]
+        $this->query->createFilterQuery($key . $field)->setQuery($query)->getLocalParameters()->addTags(
+            [$facetField->getField()]
         );
 
         if ($and) {
