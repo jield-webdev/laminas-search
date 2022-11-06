@@ -114,7 +114,10 @@ final class SearchFormResult
 
     public function hasFilterByKey(string $key): bool
     {
-        return array_key_exists(key: $key, array: $this->filter) && '' !== $this->filter[$key];
+        return array_key_exists(
+                key: $key,
+                array: $this->filter
+            ) && '' !== $this->filter[$key] && !empty($this->filter[$key]);
     }
 
     public function hasQuery(): bool
