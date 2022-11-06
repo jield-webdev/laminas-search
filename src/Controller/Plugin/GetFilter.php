@@ -11,6 +11,7 @@ use Jield\Search\ValueObject\SearchFormResult;
 use Laminas\Http\Request;
 use Laminas\Mvc\Application;
 use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
+use Laminas\Stdlib\RequestInterface;
 use Psr\Container\ContainerInterface;
 
 use function http_build_query;
@@ -21,20 +22,30 @@ final class GetFilter extends AbstractPlugin
 {
     private SearchFormResult $filter;
 
+    private ?string $encodedFilter;
+
+    private readonly Request|RequestInterface $request;
+
     public function __construct(private readonly ContainerInterface $container)
     {
+        /** @var Application $application */
+        $application = $this->container->get('application');
+
+        $this->encodedFilter = urldecode(
+            string: (string)$application->getMvcEvent()->getRouteMatch()?->getParam(
+                name: 'encodedFilter'
+            )
+        );
+
+        /** @var Request $request */
+        $this->request = $application->getMvcEvent()->getRequest();
     }
 
     public function __invoke(): GetFilter
     {
-        /** @var Application $application */
-        $application = $this->container->get('application');
-        $encodedFilter = urldecode(
-            string: (string)$application->getMvcEvent()->getRouteMatch()?->getParam(
-            name: 'encodedFilter'));
-        /** @var Request $request */
-        $request = $application->getMvcEvent()->getRequest();
-
+        //Make local variables
+        $request = $this->request;
+        $encodedFilter = $this->encodedFilter;
 
         //Initiate the filter
         $this->filter = new SearchFormResult(
