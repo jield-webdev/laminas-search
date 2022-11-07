@@ -25,7 +25,7 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
     public function __construct(
         private readonly AbstractSearchService $searchService,
         array $fields = [],
-        $method = 'get',
+        string $method = 'get',
         bool $hasDateInterval = false
     ) {
         parent::__construct();
@@ -125,7 +125,7 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
     ): MultiCheckbox {
         $multiOptions = [];
         foreach ($field as $key => $value) {
-            $multiOptions[$key] = sprintf('%s [%s]', $key, $value);
+            $multiOptions[$key] = sprintf('%s <small class="text-muted">(%s)</small>', $key, $value);
         }
 
         if ($facetField->getReverse()) {
@@ -134,10 +134,13 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
 
         $facetElement = new MultiCheckbox();
         $facetElement->setName(name: 'values');
+        $facetElement->setValue(value: $facetField->getDefaultValue());
         $facetElement->setLabel(label: $facetField->getName());
         $facetElement->setValueOptions(options: $multiOptions);
         $facetElement->setLabelOption(key: 'escape', value: false);
+        $facetElement->setLabelOption(key: 'disable_html_escape', value: true);
         $facetElement->setOption(key: 'inline', value: true);
+        $facetElement->setOption(key: 'type', value: $facetField->getType());
         $facetElement->setDisableInArrayValidator(disableOption: true);
 
         return $facetElement;
@@ -163,10 +166,6 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
     {
         $badges = [];
 
-        if (null === $this->data) {
-            throw new RuntimeException(message: "Form data is NULL, did you set the data");
-        }
-
         if (!empty($this->data['query'])) {
             $badges[] = [
                 'type' => 'search',
@@ -182,7 +181,21 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
         foreach ($this->data['facet'] as $facetName => $facetData) {
             $facetField = $this->searchService->getFacet(fieldName: $facetName);
 
-            //Remaining facets are all facets wheren the current facet value is filtered out
+            $values = $facetData['values'] ?? [];
+
+            if (is_string(value: $values) && $facetField->isSlider()) {
+                $values = array_map(callback: 'intval', array: explode(separator: ',', string: $values));
+                $valueText = sprintf('BETWEEN %s and %s', $values[0] ?? '', $values[1] ?? '');
+            } elseif ($facetField->isCheckboxMin()) {
+                $valueText = sprintf('AT LEAST %d', $values[0] ?? '');
+            } else {
+                $valueText = implode(
+                    separator: $facetData['andOr'] ?? false ? ' and ' : ' or ',
+                    array: $values
+                );
+            }
+
+            //Remaining facets are all facets where the current facet value is filtered out
             $remainingFacets = $this->data['facet'];
 
             unset($remainingFacets[$facetName]);
@@ -191,11 +204,8 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
                 'type' => 'facet',
                 'facetField' => $facetField,
                 'name' => $facetField->getName(),
-                'values' => implode(
-                    separator: $facetData['andOr'] ?? false ? ' and ' : ' or ',
-                    array: $facetData['values'] ?? []
-                ),
-                'hasValues' => count($facetData['values'] ?? []) > 0,
+                'values' => $valueText,
+                'hasValues' => (is_countable(value: $values) ? count($values) : 0) > 0,
                 'not' => !(isset($facetData['yesNo']) && $facetData['yesNo'] === 'no'),
                 'facetArguments' => http_build_query(
                     data: [
