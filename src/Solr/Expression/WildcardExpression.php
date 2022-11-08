@@ -33,7 +33,7 @@ class WildcardExpression extends Expression implements Stringable
             $prefix = substr(string: $this->prefix, offset: 0, length: -1);
             $phrasePrefix = true;
         } else {
-            $prefix = Util::escape(value: $this->prefix);
+            $prefix = $this->prefix;// Util::escape(value: $this->prefix);
             $phrasePrefix = false;
         }
 
@@ -41,7 +41,7 @@ class WildcardExpression extends Expression implements Stringable
             $suffix = substr(string: $this->suffix, offset: 1);
             $phraseSuffix = true;
         } else {
-            $suffix = Util::escape(value: $this->suffix);
+            $suffix = $this->suffix;//Util::escape(value: $this->suffix);
             $phraseSuffix = false;
         }
 
