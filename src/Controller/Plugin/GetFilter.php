@@ -88,6 +88,17 @@ final class GetFilter extends AbstractPlugin
             );
         }
 
+        if ($this->request->isPost()) {
+            $this->filter = new SearchFormResult(
+                order: $this->request->getQuery(name: 'order', default: 'default'),
+                direction: $this->request->getQuery(name: 'direction', default: Criteria::ASC),
+                query: $this->request->getPost(name: 'query'),
+                filter: $this->request->getPost(name: 'filter', default: []),
+                facet: $this->request->getPost(name: 'facet', default: []),
+                dateInterval: $this->request->getPost(name: 'dateInterval', default: new DateInterval()),
+            );
+        }
+
         return $this;
     }
 
@@ -129,14 +140,14 @@ final class GetFilter extends AbstractPlugin
     public function setFacetByKey(string $facetKey, array|string $value): void
     {
         if ($this->request->getQuery('query') === null) {
-            $this->filter->setFacetByKey($facetKey, $value);
+            $this->filter->setFacetByKey(key: $facetKey, value: $value);
         }
     }
 
     public function setFilterByKey(string $filterKey, array|string|int $value): void
     {
         if ($this->request->getQuery('query') === null) {
-            $this->filter->setFilterByKey($filterKey, $value);
+            $this->filter->setFilterByKey(key: $filterKey, value: $value);
         }
     }
 
