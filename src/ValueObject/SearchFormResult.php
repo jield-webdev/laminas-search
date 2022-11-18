@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Jield\Search\ValueObject;
 
 use Doctrine\Common\Collections\Criteria;
-use JetBrains\PhpStorm\Pure;
 use Laminas\Json;
 
 use function array_key_exists;
@@ -40,10 +39,14 @@ final class SearchFormResult
 
     public function updateFromEncodedFilter(string $encodedFilter): SearchFormResult
     {
-        $filter = (array)Json\Json::decode(
-            encodedValue: base64_decode(string: $encodedFilter),
-            objectDecodeType: Json\Json::TYPE_ARRAY
-        );
+        try {
+            $filter = (array)Json\Json::decode(
+                encodedValue: base64_decode(string: $encodedFilter),
+                objectDecodeType: Json\Json::TYPE_ARRAY
+            );
+        } catch (Json\Exception\RuntimeException) {
+            $filter = [];
+        }
 
         $this->filter       = (array)($filter['filter'] ?? []);
         $this->facet        = (array)($filter['facet'] ?? []);

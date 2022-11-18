@@ -18,7 +18,7 @@ use function http_build_query;
 use function urldecode;
 use function urlencode;
 
-final class GetFilter extends AbstractPlugin
+class GetFilter extends AbstractPlugin
 {
     private SearchFormResult $filter;
 
