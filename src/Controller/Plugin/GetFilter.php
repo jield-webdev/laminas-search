@@ -22,7 +22,7 @@ class GetFilter extends AbstractPlugin
 {
     private SearchFormResult $filter;
 
-    private ?string $encodedFilter;
+    protected ?string $encodedFilter;
 
     private readonly Request|RequestInterface $request;
 
@@ -44,7 +44,7 @@ class GetFilter extends AbstractPlugin
     public function __invoke(): GetFilter
     {
         //Make local variables
-        $request = $this->request;
+        $request       = $this->request;
         $encodedFilter = $this->encodedFilter;
 
         //Initiate the filter
@@ -164,9 +164,9 @@ class GetFilter extends AbstractPlugin
     public function getFilterFormData(): array
     {
         return [
-            'filter' => $this->filter->getFilter(),
-            'facet' => $this->filter->getFacet(),
-            'query' => $this->filter->getQuery(),
+            'filter'       => $this->filter->getFilter(),
+            'facet'        => $this->filter->getFacet(),
+            'query'        => $this->filter->getQuery(),
             'dateInterval' => $this->filter->getDateInterval()->toValue(),
         ];
     }
