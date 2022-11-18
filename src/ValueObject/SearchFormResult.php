@@ -26,7 +26,7 @@ final class SearchFormResult
     ) {
     }
 
-    #[Pure] public static function fromArray(array $params): SearchFormResult
+    public static function fromArray(array $params): SearchFormResult
     {
         return new self(
             order: $params['order'] ?? 'default',
@@ -45,10 +45,10 @@ final class SearchFormResult
             objectDecodeType: Json\Json::TYPE_ARRAY
         );
 
-        $this->filter = (array)($filter['filter'] ?? []);
-        $this->facet = (array)($filter['facet'] ?? []);
+        $this->filter       = (array)($filter['filter'] ?? []);
+        $this->facet        = (array)($filter['facet'] ?? []);
         $this->dateInterval = DateInterval::fromValue(value: $filter['dateInterval'] ?? '');
-        $this->query = $filter['query'] ?? null;
+        $this->query        = $filter['query'] ?? null;
 
         return $this;
     }
@@ -73,11 +73,11 @@ final class SearchFormResult
     public function toArray(): array
     {
         return [
-            'order' => $this->order,
-            'direction' => $this->direction,
-            'query' => $this->query,
-            'filter' => $this->filter,
-            'facet' => $this->facet,
+            'order'        => $this->order,
+            'direction'    => $this->direction,
+            'query'        => $this->query,
+            'filter'       => $this->filter,
+            'facet'        => $this->facet,
             'dateInterval' => $this->dateInterval->toValue(),
         ];
     }
@@ -123,6 +123,11 @@ final class SearchFormResult
     public function hasQuery(): bool
     {
         return !empty($this->query);
+    }
+
+    public function hasDefaultOrder(): bool
+    {
+        return $this->order === 'default';
     }
 
     public function getOrder(): string
