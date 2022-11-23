@@ -21,7 +21,8 @@ final class FacetField
         private readonly bool $reverse = false,
         private readonly bool $hasYesNo = false,
         private readonly bool $hasAndOr = false,
-        private readonly ?string $defaultValue = null
+        private readonly ?string $defaultValue = null,
+        private readonly int $limit = 100
     ) {
     }
 
@@ -37,6 +38,7 @@ final class FacetField
             hasYesNo: $params['hasYesNo'] ?? false,
             hasAndOr: $params['hasAndOr'] ?? false,
             defaultValue: $params['defaultValue'] ?? false,
+            limit: $params['limit'] ?? 100
         );
     }
 
@@ -99,5 +101,10 @@ final class FacetField
     public function getDefaultValue(): ?string
     {
         return $this->defaultValue;
+    }
+
+    public function getLimit(): int
+    {
+        return $this->limit;
     }
 }

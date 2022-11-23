@@ -52,18 +52,18 @@ abstract class AbstractSearchService implements SearchServiceInterface
 
     public function __construct(protected readonly ContainerInterface $container)
     {
-        $this->translator = $container->get(TranslatorInterface::class);
+        $this->translator    = $container->get(TranslatorInterface::class);
         $this->entityManager = $container->get(EntityManager::class);
-        $this->config = $container->get('Config');
+        $this->config        = $container->get('Config');
 
-        $this->query = $this->getSolrClient()->createSelect();
+        $this->query    = $this->getSolrClient()->createSelect();
         $this->facetSet = $this->query->getFacetSet();
     }
 
     public function getSolrClient(): Client
     {
         if (null === $this->solrClient && defined(constant_name: 'static::SOLR_CONNECTION')) {
-            $prefix = $this->config['solr']['prefix'] ?? '';
+            $prefix     = $this->config['solr']['prefix'] ?? '';
             $connection = static::SOLR_CONNECTION;
             if (!empty($prefix)) {
                 $connection = sprintf('%s_%s', $prefix, $connection);
@@ -173,7 +173,7 @@ abstract class AbstractSearchService implements SearchServiceInterface
 
         $output->writeln(messages: sprintf('Updating %d of %s', $amount, $entity::class));
 
-        $i = 0;
+        $i     = 0;
         $total = 1;
         while ($i < $amount) {
             $update = $this->getSolrClient()->createUpdate();
@@ -204,7 +204,12 @@ abstract class AbstractSearchService implements SearchServiceInterface
         }
 
         if ($amount > 0) {
-            $output->write(messages: ' <info>(' . number_format(num: (($total - 1) / $amount * 100), decimals: 0) . ' %)</info>');
+            $output->write(
+                messages: ' <info>(' . number_format(
+                    num: (($total - 1) / $amount * 100),
+                    decimals: 0
+                ) . ' %)</info>'
+            );
         }
 
         $output->writeln(messages: ['', '<comment>Update done</comment>']);
@@ -266,7 +271,13 @@ abstract class AbstractSearchService implements SearchServiceInterface
             $entity->setId($remainderId);
 
             $update->addDeleteById(id: $entity->getResourceId());
-            $output->writeln(messages: sprintf('<comment>Id %d of %s has been deleted</comment>', $remainderId, $entity::class));
+            $output->writeln(
+                messages: sprintf(
+                '<comment>Id %d of %s has been deleted</comment>',
+                $remainderId,
+                $entity::class
+            )
+            );
         }
 
         $output->writeln(
@@ -302,7 +313,8 @@ abstract class AbstractSearchService implements SearchServiceInterface
     {
         $results = $this->entityManager->getRepository($entity::class)->findBy(
             criteria: $criteria,
-            orderBy: ['id' => Criteria::ASC]);
+            orderBy: ['id' => Criteria::ASC]
+        );
 
         $databaseIds = [];
         /** @var HasSearchInterface $singleResult */
@@ -324,7 +336,8 @@ abstract class AbstractSearchService implements SearchServiceInterface
             criteria: $criteria,
             orderBy: [],
             limit: $limit,
-            offset: $offset);
+            offset: $offset
+        );
     }
 
     protected function updateIndex(OutputInterface $output, \Solarium\QueryType\Update\Query\Query $update): void
@@ -338,7 +351,10 @@ abstract class AbstractSearchService implements SearchServiceInterface
                 $response = Json::decode(encodedValue: $responseBody);
                 if (isset($response->responseHeader)) {
                     $output->writeln(
-                        messages: sprintf("<error>Solr HTTP response code: %s</error>", $response->responseHeader->status)
+                        messages: sprintf(
+                            "<error>Solr HTTP response code: %s</error>",
+                            $response->responseHeader->status
+                        )
                     );
                 }
                 if (isset($response->error)) {
@@ -394,7 +410,7 @@ abstract class AbstractSearchService implements SearchServiceInterface
 
         $update = $this->getSolrClient()->createUpdate();
         foreach ($toBeAddedItemsInSearchIndex as $newId) {
-            $entity = $this->entityManager->getRepository($entity::class)->find(id: $newId);
+            $entity   = $this->entityManager->getRepository($entity::class)->find(id: $newId);
             $document = $this->getSearchDocumentFromEntity(update: $update, entity: $entity);
 
             $update->addDocument(document: $document);
@@ -425,9 +441,9 @@ abstract class AbstractSearchService implements SearchServiceInterface
     {
         $this->query->addFilterQuery(
             filterQuery: [
-                'key' => $key,
+                'key'   => $key,
                 'query' => $key . ':(' . $value . ')',
-                'tag' => $key,
+                'tag'   => $key,
             ]
         );
     }
@@ -513,7 +529,7 @@ abstract class AbstractSearchService implements SearchServiceInterface
                 }
 
                 if (is_array($value)) {
-                    $value = array_map(static fn(string $value) => sprintf('"%s"', $value), $value);
+                    $value = array_map(static fn (string $value) => sprintf('"%s"', $value), $value);
 
                     $value = implode(' ', $value);
                 }
@@ -522,8 +538,8 @@ abstract class AbstractSearchService implements SearchServiceInterface
                 break;
             default:
                 $values = explode(',', $value);
-                $min = $values[0] ?? '';
-                $max = $values[1] ?? '';
+                $min    = $values[0] ?? '';
+                $max    = $values[1] ?? '';
 
                 //@todo; this fields a bit sloppy
                 if (str_contains(haystack: $field, needle: 'array_int')) {
@@ -573,8 +589,9 @@ abstract class AbstractSearchService implements SearchServiceInterface
         $output->writeln(messages: sprintf('Reload of core %s done', $this->connection));
 
         //Grab an array with all ids from the database
-        $qb = $this->entityManager->createQueryBuilder();
-        $result = $qb->select('e')->from(from: $entity::class, alias: 'e')->setMaxResults(maxResults: 1)->getQuery()->getResult();
+        $qb     = $this->entityManager->createQueryBuilder();
+        $result = $qb->select('e')->from(from: $entity::class, alias: 'e')->setMaxResults(maxResults: 1)->getQuery(
+        )->getResult();
 
         $update = $this->getSolrClient()->createUpdate();
 
@@ -604,9 +621,15 @@ abstract class AbstractSearchService implements SearchServiceInterface
             }
         } catch (HttpException $e) {
             $responseBody = $e->getBody();
-            $response = Json::decode(encodedValue: $responseBody);
+            $response     = Json::decode(encodedValue: $responseBody);
 
-            $output->writeln(messages: sprintf('<error>Error updating %s: %s</error>', $entity::class, $response->error->msg));
+            $output->writeln(
+                messages: sprintf(
+                '<error>Error updating %s: %s</error>',
+                $entity::class,
+                $response->error->msg
+            )
+            );
         }
     }
 
@@ -615,6 +638,7 @@ abstract class AbstractSearchService implements SearchServiceInterface
         $this->facetSet->createFacetField(options: $facetField->getField())
             ->setField(field: $facetField->getField())
             ->setMinCount(minCount: $facetField->getMinCount())
+            ->setLimit(limit: $facetField->getLimit())
             ->setSort(sort: $facetField->getSort());
 
         if (!$facetField->getHasAndOr()) {
