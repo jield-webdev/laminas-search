@@ -129,7 +129,7 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
         }
 
         if ($facetField->getReverse()) {
-            $multiOptions = array_reverse(array: $multiOptions);
+            $multiOptions = array_reverse(array: $multiOptions, preserve_keys: true);
         }
 
         $facetElement = new MultiCheckbox();

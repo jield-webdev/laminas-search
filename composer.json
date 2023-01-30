@@ -21,10 +21,10 @@
   "require": {
     "php": "~8.1.0 || ~8.2.0",
     "laminas/laminas-mvc": "^3.6",
-    "laminas/laminas-form": "^3.6",
-    "laminas/laminas-i18n": "^2.20",
-    "laminas/laminas-paginator": "^2.16",
-    "doctrine/orm": "^2.14",
+    "laminas/laminas-form": "^3.9",
+    "laminas/laminas-i18n": "^2.22",
+    "laminas/laminas-paginator": "^2.18",
+    "doctrine/orm": "^2.15",
     "kokspflanze/zfc-twig": "~4.0",
     "jetbrains/phpstorm-attributes": "^1.0",
     "solarium/solarium": "^6.2"
