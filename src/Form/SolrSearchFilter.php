@@ -14,7 +14,6 @@ use Laminas\InputFilter\InputFilterProviderInterface;
 use RuntimeException;
 use Solarium\Component\Result\Facet\FacetResultInterface;
 
-use function _;
 use function array_reverse;
 use function count;
 use function http_build_query;
@@ -36,11 +35,11 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
         if ($hasDateInterval) {
             $this->add(
                 elementOrFieldset: [
-                    'type' => Text::class,
-                    'name' => 'dateInterval',
+                    'type'    => Text::class,
+                    'name'    => 'dateInterval',
                     'options' => [
                         'is-date-range' => true,
-                        'label' => _('txt-date-interval'),
+                        'label'         => 'Date interval',
                     ],
                 ]
             );
@@ -53,10 +52,10 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
             foreach ($fields as $key => $values) {
                 $filter->add(
                     elementOrFieldset: [
-                        'type' => MultiCheckbox::class,
-                        'name' => $key,
+                        'type'    => MultiCheckbox::class,
+                        'name'    => $key,
                         'options' => [
-                            'label' => $key,
+                            'label'         => $key,
                             'value_options' => $values,
                         ],
                     ]
@@ -73,7 +72,7 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
 
         foreach ($this->searchService->getFacets() as $facetField) {
             $facetElementFieldset = new Fieldset(name: $facetField->getField());
-            $field = $this->getFacetByFacetField(fieldName: $facetField->getField());
+            $field                = $this->getFacetByFacetField(fieldName: $facetField->getField());
 
             if ($facetField->getHasYesNo()) {
                 $facetElementFieldset->add(elementOrFieldset: $this->createYesNoFormElement());
@@ -168,8 +167,8 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
 
         if (!empty($this->data['query'])) {
             $badges[] = [
-                'type' => 'search',
-                'query' => $this->data['query'],
+                'type'           => 'search',
+                'query'          => $this->data['query'],
                 'facetArguments' => http_build_query(
                     data: [
                         'facet' => $this->data['facet'],
@@ -184,7 +183,7 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
             $values = $facetData['values'] ?? [];
 
             if (is_string(value: $values) && $facetField->isSlider()) {
-                $values = array_map(callback: 'intval', array: explode(separator: ',', string: $values));
+                $values    = array_map(callback: 'intval', array: explode(separator: ',', string: $values));
                 $valueText = sprintf('BETWEEN %s and %s', $values[0] ?? '', $values[1] ?? '');
             } elseif ($facetField->isCheckboxMin()) {
                 $valueText = sprintf('AT LEAST %d', $values[0] ?? '');
@@ -201,12 +200,12 @@ class SolrSearchFilter extends SearchFilter implements InputFilterProviderInterf
             unset($remainingFacets[$facetName]);
 
             $badges[] = [
-                'type' => 'facet',
-                'facetField' => $facetField,
-                'name' => $facetField->getName(),
-                'values' => $valueText,
-                'hasValues' => (is_countable(value: $values) ? count($values) : 0) > 0,
-                'not' => !(isset($facetData['yesNo']) && $facetData['yesNo'] === 'no'),
+                'type'           => 'facet',
+                'facetField'     => $facetField,
+                'name'           => $facetField->getName(),
+                'values'         => $valueText,
+                'hasValues'      => (is_countable(value: $values) ? count($values) : 0) > 0,
+                'not'            => !(isset($facetData['yesNo']) && $facetData['yesNo'] === 'no'),
                 'facetArguments' => http_build_query(
                     data: [
                         'query' => $this->data['query'],
