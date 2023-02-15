@@ -17,13 +17,12 @@
       "homepage": "https://jield.nl"
     }
   ],
-  "minimum-stability": "dev",
   "require": {
     "php": "~8.1.0 || ~8.2.0",
     "laminas/laminas-mvc": "^3.6",
-    "laminas/laminas-form": "^3.9",
-    "laminas/laminas-i18n": "^2.22",
-    "laminas/laminas-paginator": "^2.18",
+    "laminas/laminas-form": "^3.8",
+    "laminas/laminas-i18n": "^2.21",
+    "laminas/laminas-paginator": "^2.17",
     "doctrine/orm": "^2",
     "kokspflanze/zfc-twig": "~4.0",
     "jetbrains/phpstorm-attributes": "^1.0",
@@ -39,7 +38,7 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "Jield\\SearchTest\\": "src"
+      "Jield\\SearchTest\\": "test"
     }
   },
   "config": {
@@ -55,7 +54,7 @@
       "module": "Jield\\Search\\Module"
     },
     "branch-alias": {
-      "dev-master": "1.0-dev",
+      "dev-main": "1.0-dev",
       "dev-develop": "1.1-dev"
     }
   },
