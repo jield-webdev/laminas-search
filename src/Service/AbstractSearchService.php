@@ -112,7 +112,7 @@ abstract class AbstractSearchService implements SearchServiceInterface
         $this->getSolrClient()->update(query: $update);
     }
 
-    public function getSearchDocumentFromEntity(
+    protected function getSearchDocumentFromEntity(
         \Solarium\QueryType\Update\Query\Query $update,
         HasSearchInterface                     $entity
     ): DocumentInterface
