@@ -9,8 +9,17 @@ use Jield\Search\Command\UpdateIndex;
 use Jield\Search\Controller\Plugin\GetFilter;
 use Jield\Search\Factory\ConsoleServiceFactory;
 use Jield\Search\Factory\GetFilterFactory;
+use Jield\Search\Factory\JobFactory;
+use Jield\Search\Factory\SearchQueueServiceFactory;
+use Jield\Search\Job\UpdateSearchEntities;
+use Jield\Search\Job\UpdateSearchEntity;
+use Jield\Search\Job\UpdateSearchIndex;
 use Jield\Search\Service\ConsoleService;
+use Jield\Search\Service\SearchQueueService;
 use Laminas\ServiceManager\AbstractFactory\ConfigAbstractFactory;
+use SlmQueue\Strategy\MaxMemoryStrategy;
+use SlmQueue\Strategy\WorkerLifetimeStrategy;
+use SlmQueueDoctrine\Factory\DoctrineQueueFactory;
 
 final class ConfigProvider
 {
@@ -18,17 +27,18 @@ final class ConfigProvider
     {
         return [
             ConfigAbstractFactory::class => $this->getConfigAbstractFactory(),
-            'service_manager' => $this->getServiceMangerConfig(),
-            'laminas-cli' => $this->getCommandConfig(),
-            'view_manager' => $this->getViewManagerConfig(),
-            'controller_plugins' => $this->getControllerPluginConfig(),
+            'service_manager'            => $this->getServiceMangerConfig(),
+            'laminas-cli'                => $this->getCommandConfig(),
+            'view_manager'               => $this->getViewManagerConfig(),
+            'controller_plugins'         => $this->getControllerPluginConfig(),
+            'slm_queue'                  => $this->getQueueConfig(),
         ];
     }
 
     public function getControllerPluginConfig(): array
     {
         return [
-            'aliases' => [
+            'aliases'   => [
                 'getFilter' => GetFilter::class,
             ],
             'factories' => [
@@ -51,9 +61,9 @@ final class ConfigProvider
         return [
             'commands' => [
                 'search:update-index' => UpdateIndex::class,
-                'search:sync-index' => SyncIndex::class,
-                'search:test-index' => TestIndex::class,
-                'search:list-cores' => ListCores::class,
+                'search:sync-index'   => SyncIndex::class,
+                'search:test-index'   => TestIndex::class,
+                'search:list-cores'   => ListCores::class,
             ]
         ];
     }
@@ -62,11 +72,47 @@ final class ConfigProvider
     {
         return [
             'factories' => [
-                UpdateIndex::class => ConfigAbstractFactory::class,
-                SyncIndex::class => ConfigAbstractFactory::class,
-                TestIndex::class => ConfigAbstractFactory::class,
-                ListCores::class => ConfigAbstractFactory::class,
-                ConsoleService::class => ConsoleServiceFactory::class,
+                UpdateIndex::class        => ConfigAbstractFactory::class,
+                SyncIndex::class          => ConfigAbstractFactory::class,
+                TestIndex::class          => ConfigAbstractFactory::class,
+                ListCores::class          => ConfigAbstractFactory::class,
+                ConsoleService::class     => ConsoleServiceFactory::class,
+                SearchQueueService::class => SearchQueueServiceFactory::class,
+            ],
+        ];
+    }
+
+    public function getQueueConfig(): array
+    {
+        return [
+            'queues'            => [
+                'search' => [
+                    'table_name'       => 'queue_default',
+                    'buried_lifetime'  => -1,
+                    'deleted_lifetime' => 60 * 24 * 2 #in minutes,
+                ],
+            ],
+            'worker_strategies' => [
+                'default' => [ // per worker
+                               WorkerLifetimeStrategy::class => ['lifetime' => 299],
+                               MaxMemoryStrategy::class      => ['max_memory' => 1000 * 1024 * 1024],
+                ],
+                'queues'  => [ // per queue
+                               'default' => [],
+                ],
+            ],
+            'strategy_manager'  => [],
+            'queue_manager'     => [
+                'factories' => [
+                    'search' => DoctrineQueueFactory::class,
+                ],
+            ],
+            'job_manager'       => [
+                'factories' => [
+                    UpdateSearchEntity::class   => JobFactory::class,
+                    UpdateSearchEntities::class => JobFactory::class,
+                    UpdateSearchIndex::class    => JobFactory::class,
+                ],
             ],
         ];
     }
@@ -77,16 +123,15 @@ final class ConfigProvider
             UpdateIndex::class => [
                 ConsoleService::class,
             ],
-            SyncIndex::class => [
+            SyncIndex::class   => [
                 ConsoleService::class,
             ],
-            TestIndex::class => [
+            TestIndex::class   => [
                 ConsoleService::class,
             ],
-            ListCores::class => [
+            ListCores::class   => [
                 ConsoleService::class,
             ],
-
         ];
     }
 }
