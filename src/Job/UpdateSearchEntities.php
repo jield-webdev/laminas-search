@@ -24,11 +24,7 @@ final class UpdateSearchEntities extends AbstractJob
     {
         $entityClassName = $this->getContent()['entityClassName'];
         $entityIds       = $this->getContent()['entityIds'];
-        $searchService   = $this->getContent()['searchService'];
-
-        //I have to tell the system which search service we have to take (to have the correct connection)
-        /** @var AbstractSearchService $searchServiceInstance */
-        $searchServiceInstance = $this->container->get($searchService);
+        $searchServices  = $this->getContent()['searchServices'];
 
         //Grab the entities
         $entities = [];
@@ -43,7 +39,12 @@ final class UpdateSearchEntities extends AbstractJob
             $entities[] = $entity;
         }
 
-        $searchServiceInstance->updateEntities($entities);
+        foreach ($searchServices as $searchService) {
+            //I have to tell the system which search service we have to take (to have the correct connection)
+            /** @var AbstractSearchService $searchServiceInstance */
+            $searchServiceInstance = $this->container->get($searchService);
+            $searchServiceInstance->updateEntities($entities);
+        }
 
         return null;
     }

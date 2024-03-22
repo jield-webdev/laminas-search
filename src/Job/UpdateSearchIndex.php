@@ -22,14 +22,16 @@ final class UpdateSearchIndex extends AbstractJob
     public function execute(): ?int
     {
         $entityClassName = $this->getContent()['entityClassName'];
-        $searchService   = $this->getContent()['searchService'];
+        $searchServices  = $this->getContent()['searchServices'];
 
-        //I have to tell the system which search service we have to take (to have the correct connection)
-        /** @var AbstractSearchService $searchServiceInstance */
-        $searchServiceInstance = $this->container->get($searchService);
-        $output                = new BufferedOutput();
+        $output = new BufferedOutput();
 
-        $searchServiceInstance->updateCollection(output: $output, entity: new $entityClassName());
+        foreach ($searchServices as $searchService) {
+            //I have to tell the system which search service we have to take (to have the correct connection)
+            /** @var AbstractSearchService $searchServiceInstance */
+            $searchServiceInstance = $this->container->get($searchService);
+            $searchServiceInstance->updateCollection(output: $output, entity: new $entityClassName());
+        }
 
         return null;
     }

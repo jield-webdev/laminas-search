@@ -16,7 +16,7 @@ use SlmQueue\Queue\QueuePluginManager;
 use SlmQueueDoctrine\Queue\DoctrineQueue;
 use Webmozart\Assert\Assert;
 
-class SearchQueueService
+class SearchUpdateService
 {
     private DoctrineQueue $queue;
 
@@ -37,7 +37,7 @@ class SearchQueueService
             $job->setContent([
                 'entityClassName' => $entity::class,
                 'entityId'        => $entity->getId(),
-                'searchService'   => $this->findSearchServiceFromEntity(entity: $entity),
+                'searchServices'  => $this->findSearchServicesFromEntity(entity: $entity),
             ]);
 
             $this->queue->push(job: $job);
@@ -45,15 +45,34 @@ class SearchQueueService
             return;
         }
 
-        $searchServiceName = $this->findSearchServiceFromEntity(entity: $entity);
-        /** @var AbstractSearchService $searchServiceInstance */
-        $searchServiceInstance = $this->container->get($searchServiceName);
-        $searchServiceInstance->updateEntity(entity: $entity);
+        $searchServiceNames = $this->findSearchServicesFromEntity(entity: $entity);
+
+        foreach ($searchServiceNames as $searchServiceName) {
+            /** @var AbstractSearchService $searchServiceInstance */
+            $searchServiceInstance = $this->container->get($searchServiceName);
+            $searchServiceInstance->updateEntity(entity: $entity);
+        }
+    }
+
+    public function deleteDocument(HasSearchInterface $entity): void
+    {
+        $searchServiceNames = $this->findSearchServicesFromEntity(entity: $entity);
+
+        foreach ($searchServiceNames as $searchServiceName) {
+            /** @var AbstractSearchService $searchServiceInstance */
+            $searchServiceInstance = $this->container->get($searchServiceName);
+            $searchServiceInstance->deleteDocument(entity: $entity);
+        }
     }
 
     public function updateEntities(array|Collection $entities): void
     {
         $job = $this->jobPluginManager->get(name: UpdateSearchEntities::class);
+
+        //Always convert to array
+        if ($entities instanceof Collection) {
+            $entities = $entities->toArray();
+        }
 
         //The array cannot be emtpy
         if (empty($entities)) {
@@ -66,7 +85,6 @@ class SearchQueueService
         //We only push the ID's and the classname and the service into the job
         $entityIds = [];
         foreach ($entities as $updateAbleEntity) {
-
             //We only allow entities of the same class
             if ($updateAbleEntity::class !== $entityClassName) {
                 throw new \InvalidArgumentException('All entities must be of the same class');
@@ -79,7 +97,7 @@ class SearchQueueService
         $job->setContent([
             'entityClassName' => $entityClassName,
             'entityIds'       => $entityIds,
-            'searchService'   => $this->findSearchServiceFromEntity(entity: new $entityClassName()),
+            'searchServices'  => $this->findSearchServicesFromEntity(entity: new $entityClassName()),
         ]);
 
         $this->queue->push(job: $job);
@@ -96,23 +114,25 @@ class SearchQueueService
         $job = $this->jobPluginManager->get(name: UpdateSearchIndex::class);
         $job->setContent([
             'entityClassName' => $entityClassName,
-            'searchService'   => $this->findSearchServiceFromEntity(entity: new $entityClassName()),
+            'searchServices'  => $this->findSearchServicesFromEntity(entity: new $entityClassName()),
         ]);
 
         $this->queue->push(job: $job);
     }
 
-    private function findSearchServiceFromEntity(HasSearchInterface $entity): string
+    private function findSearchServicesFromEntity(HasSearchInterface $entity): array
     {
         //Sometimes we get proxies, then we need to get the real class
         $entityClassName = ClassUtils::getRealClass(className: $entity::class);
 
+        $services = [];
+
         foreach ($this->cores as $core) {
             if ($core['entity'] === $entityClassName) {
-                return $core['service'];
+                $services[] = $core['service'];
             }
         }
 
-        throw new \InvalidArgumentException('No search service found for entity ' . $entityClassName);
+        return array_unique($services);
     }
 }

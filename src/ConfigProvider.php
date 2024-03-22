@@ -15,7 +15,7 @@ use Jield\Search\Job\UpdateSearchEntities;
 use Jield\Search\Job\UpdateSearchEntity;
 use Jield\Search\Job\UpdateSearchIndex;
 use Jield\Search\Service\ConsoleService;
-use Jield\Search\Service\SearchQueueService;
+use Jield\Search\Service\SearchUpdateService;
 use Laminas\ServiceManager\AbstractFactory\ConfigAbstractFactory;
 use SlmQueue\Strategy\MaxMemoryStrategy;
 use SlmQueue\Strategy\WorkerLifetimeStrategy;
@@ -72,12 +72,12 @@ final class ConfigProvider
     {
         return [
             'factories' => [
-                UpdateIndex::class        => ConfigAbstractFactory::class,
-                SyncIndex::class          => ConfigAbstractFactory::class,
-                TestIndex::class          => ConfigAbstractFactory::class,
-                ListCores::class          => ConfigAbstractFactory::class,
-                ConsoleService::class     => ConsoleServiceFactory::class,
-                SearchQueueService::class => SearchQueueServiceFactory::class,
+                UpdateIndex::class         => ConfigAbstractFactory::class,
+                SyncIndex::class           => ConfigAbstractFactory::class,
+                TestIndex::class           => ConfigAbstractFactory::class,
+                ListCores::class           => ConfigAbstractFactory::class,
+                ConsoleService::class      => ConsoleServiceFactory::class,
+                SearchUpdateService::class => SearchQueueServiceFactory::class,
             ],
         ];
     }
@@ -87,7 +87,7 @@ final class ConfigProvider
         return [
             'queues'            => [
                 'search' => [
-                    'table_name'       => 'queue_default',
+                    'table_name'       => 'admin_queue_default',
                     'buried_lifetime'  => -1,
                     'deleted_lifetime' => 60 * 24 * 2 #in minutes,
                 ],
