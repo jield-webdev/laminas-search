@@ -24,6 +24,9 @@ final class UpdateSearchIndex extends AbstractJob
         $entityClassName = $this->getContent()['entityClassName'];
         $searchServices  = $this->getContent()['searchServices'];
 
+        //Clear the entity manager to always have fresh results
+        $this->entityManager->clear();
+
         $output = new BufferedOutput();
 
         foreach ($searchServices as $searchService) {

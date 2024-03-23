@@ -26,6 +26,9 @@ final class UpdateSearchEntities extends AbstractJob
         $entityIds       = $this->getContent()['entityIds'];
         $searchServices  = $this->getContent()['searchServices'];
 
+        //Clear the entity manager to always have fresh results
+        $this->entityManager->clear();
+
         //Grab the entities
         $entities = [];
 
