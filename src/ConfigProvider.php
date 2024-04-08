@@ -93,12 +93,12 @@ final class ConfigProvider
                 ],
             ],
             'worker_strategies' => [
-                'default' => [ // per worker
-                               WorkerLifetimeStrategy::class => ['lifetime' => 299],
-                               MaxMemoryStrategy::class      => ['max_memory' => 1000 * 1024 * 1024],
+                'default' => [
+                    WorkerLifetimeStrategy::class => ['lifetime' => 299],
+                    MaxMemoryStrategy::class      => ['max_memory' => 1000 * 1024 * 1024],
                 ],
-                'queues'  => [ // per queue
-                               'default' => [],
+                'queues'  => [
+                    'default' => [],
                 ],
             ],
             'strategy_manager'  => [],
