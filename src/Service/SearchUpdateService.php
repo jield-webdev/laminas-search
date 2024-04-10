@@ -80,8 +80,11 @@ class SearchUpdateService
         }
 
         //When doing this, the entities _must_ be of the same class
-        //Use the entity class name of the first entity
-        $entityClassName = $entities[0]::class;
+        //Use the entity class name of the first entity (use array_pop to get the last element)
+        $firstEntity = array_pop($entities);
+
+        $entityClassName = $firstEntity::class;
+
         //We only push the ID's and the classname and the service into the job
         $entityIds = [];
         foreach ($entities as $updateAbleEntity) {
