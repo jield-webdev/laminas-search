@@ -81,7 +81,7 @@ class SearchUpdateService
 
         //When doing this, the entities _must_ be of the same class
         //Use the entity class name of the first entity (use array_pop to get the last element)
-        $firstEntity = array_pop($entities);
+        $firstEntity = reset($entities);
 
         $entityClassName = $firstEntity::class;
 
