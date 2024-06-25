@@ -6,7 +6,6 @@ namespace Jield\Search\ValueObject;
 
 use Doctrine\Common\Collections\Criteria;
 use Laminas\Json;
-
 use function array_key_exists;
 use function base64_decode;
 use function base64_encode;
@@ -16,13 +15,14 @@ use function strtoupper;
 final class SearchFormResult
 {
     public function __construct(
-        private string $order = '',
-        private string $direction = Criteria::ASC,
-        private ?string $query = null,
-        private array $filter = [],
-        private array $facet = [],
+        private string       $order = '',
+        private string       $direction = Criteria::ASC,
+        private ?string      $query = null,
+        private array        $filter = [],
+        private array        $facet = [],
         private DateInterval $dateInterval = new DateInterval(),
-    ) {
+    )
+    {
     }
 
     public static function fromArray(array $params): SearchFormResult
@@ -120,7 +120,7 @@ final class SearchFormResult
         return array_key_exists(
                 key: $key,
                 array: $this->filter
-            ) && '' !== $this->filter[$key] && !empty($this->filter[$key]);
+            ) && '' !== $this->filter[$key] && null !== $this->filter[$key];
     }
 
     public function hasQuery(): bool
