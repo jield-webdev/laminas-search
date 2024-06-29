@@ -120,7 +120,7 @@ final class SearchFormResult
         return array_key_exists(
                 key: $key,
                 array: $this->filter
-            ) && '' !== $this->filter[$key] && null !== $this->filter[$key];
+            ) && '' !== $this->filter[$key] && null !== $this->filter[$key] && [] !== $this->filter[$key];
     }
 
     public function hasQuery(): bool
