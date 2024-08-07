@@ -24,13 +24,13 @@
     "laminas/laminas-i18n": "^2.24",
     "laminas/laminas-paginator": "^2.18",
     "doctrine/orm": "^2 || ^3",
-    "kokspflanze/zfc-twig": "~4.1",
+    "saeven/zfc-twig": "4.x-dev",
     "jetbrains/phpstorm-attributes": "^1.0",
     "solarium/solarium": "^6.3",
     "slm/queue-doctrine": "^4.4"
   },
   "require-dev": {
-    "iteaoffice/testing": "^3.5-dev"
+    "iteaoffice/testing": "^4.1-dev"
   },
   "autoload": {
     "psr-4": {
