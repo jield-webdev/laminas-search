@@ -89,7 +89,7 @@ class SearchUpdateService
         $entityIds = [];
         foreach ($entities as $updateAbleEntity) {
             //We only allow entities of the same class
-            if (ClassUtils::getRealClass(className: $updateAbleEntity::class) !== $entityClassName) {
+            if (ClassUtils::getRealClass(className: $updateAbleEntity::class) !== ClassUtils::getRealClass($entityClassName)) {
                 throw new \InvalidArgumentException('All entities must be of the same class, got ' . ClassUtils::getRealClass(className: $updateAbleEntity::class) . ' and expected ' . $entityClassName);
             }
 
