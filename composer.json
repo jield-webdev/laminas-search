@@ -24,7 +24,7 @@
     "laminas/laminas-i18n": "^2.24",
     "laminas/laminas-paginator": "^2.18",
     "doctrine/orm": "^2 || ^3",
-    "saeven/zfc-twig": "4.x-dev",
+    "kokspflanze/zfc-twig": "4.x-dev",
     "jetbrains/phpstorm-attributes": "^1.0",
     "solarium/solarium": "^6.3",
     "slm/queue-doctrine": "^4.4"
