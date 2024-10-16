@@ -47,7 +47,7 @@ abstract class AbstractSearchService implements SearchServiceInterface
 
     private array $config;
 
-    private readonly string $connection;
+    private string $connection;
 
     public function __construct(protected readonly ContainerInterface $container)
     {
