@@ -19,8 +19,7 @@ final class Module implements ConfigProviderInterface, DependencyIndicatorInterf
     public function getModuleDependencies(): array
     {
         return [
-            'SlmQueue',
-            'SlmQueueDoctrine'
+            'Netglue\PsrContainer\Messenger',
         ];
     }
 }
