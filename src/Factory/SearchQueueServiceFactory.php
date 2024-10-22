@@ -7,8 +7,6 @@ namespace Jield\Search\Factory;
 use Jield\Search\Service\SearchUpdateService;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Psr\Container\ContainerInterface;
-use SlmQueue\Job\JobPluginManager;
-use SlmQueue\Queue\QueuePluginManager;
 
 final class SearchQueueServiceFactory implements FactoryInterface
 {
@@ -16,9 +14,8 @@ final class SearchQueueServiceFactory implements FactoryInterface
     {
         return new SearchUpdateService(
             container: $container,
-            cores: $container->get('config')['search']['cores'] ?? [],
-            jobPluginManager: $container->get(JobPluginManager::class),
-            queuePluginManager: $container->get(QueuePluginManager::class)
+            bus: $container->get('Jield\Search\Bus'),
+            cores: $container->get('Config'),
         );
     }
 }

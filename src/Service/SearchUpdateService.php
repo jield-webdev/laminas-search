@@ -6,41 +6,33 @@ namespace Jield\Search\Service;
 
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Util\ClassUtils;
+use InvalidArgumentException;
 use Jield\Search\Entity\HasSearchInterface;
-use Jield\Search\Job\UpdateSearchEntities;
-use Jield\Search\Job\UpdateSearchEntity;
-use Jield\Search\Job\UpdateSearchIndex;
+use Jield\Search\Message\UpdateSearchEntitiesMessage;
+use Jield\Search\Message\UpdateSearchEntityMessage;
+use Jield\Search\Message\UpdateSearchIndexMessage;
 use Psr\Container\ContainerInterface;
-use SlmQueue\Job\JobPluginManager;
-use SlmQueue\Queue\QueuePluginManager;
-use SlmQueueDoctrine\Queue\DoctrineQueue;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Webmozart\Assert\Assert;
 
 class SearchUpdateService
 {
-    private DoctrineQueue $queue;
-
     public function __construct(
-        private readonly ContainerInterface $container,
-        private readonly array              $cores,
-        private readonly JobPluginManager   $jobPluginManager,
-        private readonly QueuePluginManager $queuePluginManager
+        private readonly ContainerInterface  $container,
+        private readonly MessageBusInterface $bus,
+        private readonly array               $cores,
     )
     {
-        $this->queue = $this->queuePluginManager->get(name: 'search');
     }
 
     public function updateEntity(HasSearchInterface $entity, bool $queued = false): void
     {
         if ($queued) {
-            $job = $this->jobPluginManager->get(name: UpdateSearchEntity::class);
-            $job->setContent([
-                'entityClassName' => $entity::class,
-                'entityId'        => $entity->getId(),
-                'searchServices'  => $this->findSearchServicesFromEntity(entity: $entity),
-            ]);
-
-            $this->queue->push(job: $job);
+            $this->bus->dispatch(new UpdateSearchEntityMessage(
+                entityClassName: $entity::class,
+                entityId: $entity->getId(),
+                searchService: $this->findSearchServiceFromEntity(entity: $entity),
+            ));
 
             return;
         }
@@ -67,8 +59,6 @@ class SearchUpdateService
 
     public function updateEntities(array|Collection $entities): void
     {
-        $job = $this->jobPluginManager->get(name: UpdateSearchEntities::class);
-
         //Always convert to array
         if ($entities instanceof Collection) {
             $entities = $entities->toArray();
@@ -96,14 +86,11 @@ class SearchUpdateService
             $entityIds[] = $updateAbleEntity->getId();
         }
 
-
-        $job->setContent([
-            'entityClassName' => $entityClassName,
-            'entityIds'       => $entityIds,
-            'searchServices'  => $this->findSearchServicesFromEntity(entity: new $entityClassName()),
-        ]);
-
-        $this->queue->push(job: $job);
+        $this->bus->dispatch(new UpdateSearchEntitiesMessage(
+            entityClassName: $entityClassName,
+            entityIds: $entityIds,
+            searchServices: $this->findSearchServicesFromEntity(entity: $entityClassName),
+        ));
     }
 
     public function updateIndex(string $entityClassName): void
@@ -114,21 +101,17 @@ class SearchUpdateService
         //Only entity classnames which implement interface can be used
         Assert::isInstanceOf(new $entityClassName(), class: HasSearchInterface::class);
 
-        $job = $this->jobPluginManager->get(name: UpdateSearchIndex::class);
-        $job->setContent([
-            'entityClassName' => $entityClassName,
-            'searchServices'  => $this->findSearchServicesFromEntity(entity: new $entityClassName()),
-        ]);
-
         $this->queue->push(job: $job);
+        $this->bus->dispatch(new UpdateSearchIndexMessage(
+            entityClassName: $entityClassName,
+            searchServices: $this->findSearchServiceFromEntity(entity: new $entityClassName()),
+        ));
     }
 
     private function findSearchServicesFromEntity(HasSearchInterface $entity): array
     {
         //Sometimes we get proxies, then we need to get the real class
         $entityClassName = ClassUtils::getRealClass(className: $entity::class);
-
-        $services = [];
 
         foreach ($this->cores as $core) {
             if ($core['entity'] === $entityClassName) {

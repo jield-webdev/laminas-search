@@ -2,16 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Jield\Search\Job;
+namespace Jield\Search\Message\Handler;
 
 use Doctrine\ORM\EntityManager;
 use Jield\Search\Entity\HasSearchInterface;
+use Jield\Search\Message\UpdateSearchEntityMessage;
 use Jield\Search\Service\AbstractSearchService;
 use Psr\Container\ContainerInterface;
-use SlmQueue\Job\AbstractJob;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Webmozart\Assert\Assert;
 
-final class UpdateSearchEntity extends AbstractJob
+#[AsMessageHandler]
+final class UpdateSearchEntityHandler
 {
 
     public function __construct(
@@ -21,11 +23,11 @@ final class UpdateSearchEntity extends AbstractJob
     {
     }
 
-    public function execute(): ?int
+    public function __invoke(UpdateSearchEntityMessage $updateSearchEntityMessage): int
     {
-        $entityClassName = $this->getContent()['entityClassName'];
-        $entityId        = $this->getContent()['entityId'];
-        $searchServices  = $this->getContent()['searchServices'];
+        $entityClassName = $updateSearchEntityMessage->getEntityClassName();
+        $entityId        = $updateSearchEntityMessage->getEntityId();
+        $searchServices  = $updateSearchEntityMessage->getSearchServices();
 
         //Clear the entity manager to always have fresh results
         $this->entityManager->clear();
@@ -43,6 +45,6 @@ final class UpdateSearchEntity extends AbstractJob
             $searchServiceInstance->updateEntity($entity);
         }
 
-        return null;
+        return 0;
     }
 }
