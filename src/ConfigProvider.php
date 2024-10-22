@@ -9,7 +9,7 @@ use Jield\Search\Command\UpdateIndex;
 use Jield\Search\Controller\Plugin\GetFilter;
 use Jield\Search\Factory\ConsoleServiceFactory;
 use Jield\Search\Factory\GetFilterFactory;
-use Jield\Search\Factory\SearchQueueServiceFactory;
+use Jield\Search\Factory\SearchUpdateServiceFactory;
 use Jield\Search\Factory\UpdateSearchHandlerFactory;
 use Jield\Search\Message\Handler\UpdateSearchEntitiesHandler;
 use Jield\Search\Message\Handler\UpdateSearchEntityHandler;
@@ -76,20 +76,20 @@ final class ConfigProvider
     {
         return [
             'factories' => [
-                UpdateSearchEntityHandler:: class     => UpdateSearchHandlerFactory::class,
-                UpdateSearchEntitiesHandler:: class   => UpdateSearchHandlerFactory::class,
-                UpdateSearchIndexHandler:: class      => UpdateSearchHandlerFactory::class,
-                UpdateIndex::class                    => ConfigAbstractFactory::class,
-                SyncIndex::class                      => ConfigAbstractFactory::class,
-                TestIndex::class                      => ConfigAbstractFactory::class,
-                ListCores::class                      => ConfigAbstractFactory::class,
-                SearchQueueService::class             => SearchQueueServiceFactory::class,
-                ConsoleService::class                 => ConsoleServiceFactory::class,
-                'Jield\Search\Bus'                    => [MessageBusStaticFactory::class, 'Jield\Search\Bus'],
-                'Jield\Search\Bus\Sender\Middleware'  => [MessageSenderMiddlewareStaticFactory::class, 'Jield\Search\Bus'],
-                'Jield\Search\Bus\Handler\Middleware' => [MessageHandlerMiddlewareStaticFactory::class, 'Jield\Search\Bus'],
-                'my.redis.transport'                  => [\Netglue\PsrContainer\Messenger\Container\TransportFactory::class, 'my.redis.transport'],
-                'my_default_failure_transport'        => [\Netglue\PsrContainer\Messenger\Container\TransportFactory::class, 'my.redis.transport'],
+                UpdateSearchEntityHandler:: class             => UpdateSearchHandlerFactory::class,
+                UpdateSearchEntitiesHandler:: class           => UpdateSearchHandlerFactory::class,
+                UpdateSearchIndexHandler:: class              => UpdateSearchHandlerFactory::class,
+                UpdateIndex::class                            => ConfigAbstractFactory::class,
+                SyncIndex::class                              => ConfigAbstractFactory::class,
+                TestIndex::class                              => ConfigAbstractFactory::class,
+                ListCores::class                              => ConfigAbstractFactory::class,
+                SearchUpdateService::class                    => SearchUpdateServiceFactory::class,
+                ConsoleService::class                         => ConsoleServiceFactory::class,
+                'Jield\Search\Command\Bus'                    => [MessageBusStaticFactory::class, 'Jield\Search\Command\Bus'],
+                'Jield\Search\Command\Bus\Sender\Middleware'  => [MessageSenderMiddlewareStaticFactory::class, 'Jield\Search\Command\Bus'],
+                'Jield\Search\Command\Bus\Handler\Middleware' => [MessageHandlerMiddlewareStaticFactory::class, 'Jield\Search\Command\Bus'],
+                'my.redis.transport'                          => [\Netglue\PsrContainer\Messenger\Container\TransportFactory::class, 'my.redis.transport'],
+                'my_default_failure_transport'                => [\Netglue\PsrContainer\Messenger\Container\TransportFactory::class, 'my.redis.transport'],
             ],
         ];
     }
@@ -142,7 +142,7 @@ final class ConfigProvider
                     ],
                 ],
                 'buses'             => [
-                    'Jield\Search\Bus' => [
+                    'Jield\Search\Command\Bus' => [
                         'allows_zero_handlers' => false, // Means that it's an error if no handlers are defined for a given message
 
                         /**
@@ -152,8 +152,8 @@ final class ConfigProvider
                          */
                         'middleware'           => [
                             // … Middleware that inspects the message before it has been sent to a transport would go here.
-                            'Jield\Search\Bus\Sender\Middleware', // Sends messages via a transport if configured.
-                            'Jield\Search\Bus\Handler\Middleware', // Executes the handlers configured for the message
+                            'Jield\Search\Command\Bus\Sender\Middleware', // Sends messages via a transport if configured.
+                            'Jield\Search\Command\Bus\Handler\Middleware', // Executes the handlers configured for the message
                         ],
 
                         /**
