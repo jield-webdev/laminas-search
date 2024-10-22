@@ -6,6 +6,7 @@ namespace Jield\Search\Message\Handler;
 
 use Doctrine\ORM\EntityManager;
 use Jield\Search\Entity\HasSearchInterface;
+use Jield\Search\Message\UpdateSearchEntitiesMessage;
 use Jield\Search\Service\AbstractSearchService;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -25,7 +26,7 @@ final class UpdateSearchEntitiesHandler
     {
         $entityClassName = $updateSearchEntitiesMessage->getEntityClassName();
         $entityIds       = $updateSearchEntitiesMessage->getEntityIds();
-        $searchService   = $updateSearchEntitiesMessage->getSearchServices();
+        $searchServices  = $updateSearchEntitiesMessage->getSearchServices();
 
         //Clear the entity manager to always have fresh results
         $this->entityManager->clear();
@@ -50,6 +51,6 @@ final class UpdateSearchEntitiesHandler
             $searchServiceInstance->updateEntities($entities);
         }
 
-        return null;
+        return 0;
     }
 }

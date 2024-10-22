@@ -11,7 +11,8 @@ use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-final class UpdateSearchIndex extends AbstractJob
+#[AsMessageHandler]
+final class UpdateSearchIndexHandler
 {
     public function __construct(
         private readonly ContainerInterface $container,
@@ -23,7 +24,7 @@ final class UpdateSearchIndex extends AbstractJob
     public function __invoke(UpdateSearchIndexMessage $updateSearchIndexMessage): int
     {
         $entityClassName = $updateSearchIndexMessage->getEntityClassName();
-        $searchService   = $updateSearchIndexMessage->getSearchService();
+        $searchServices  = $updateSearchIndexMessage->getSearchServices();
 
         //Clear the entity manager to always have fresh results
         $this->entityManager->clear();

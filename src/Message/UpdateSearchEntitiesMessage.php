@@ -3,14 +3,22 @@
 namespace Jield\Search\Message;
 
 
+use Jield\Search\Service\SearchServiceInterface;
+use Webmozart\Assert\Assert;
+
 final class UpdateSearchEntitiesMessage
 {
     public function __construct(
         private readonly string $entityClassName,
         private readonly array  $entityIds,
-        private readonly string $searchService,
+        private readonly array  $searchServices,
     )
     {
+        //All search services have to implement the SearchServiceInterface
+        Assert::allImplementsInterface(value: $searchServices, interface: SearchServiceInterface::class);
+
+        //All entity ids have to be integers
+        Assert::allInteger($entityIds);
     }
 
     public function getEntityClassName(): string
@@ -23,8 +31,8 @@ final class UpdateSearchEntitiesMessage
         return $this->entityIds;
     }
 
-    public function getSearchService(): string
+    public function getSearchServices(): array
     {
-        return $this->searchService;
+        return $this->searchServices;
     }
 }
