@@ -289,7 +289,7 @@ abstract class AbstractSearchService implements SearchServiceInterface
         $this->getSolrClient()->update(query: $update);
     }
 
-    protected function findAllIdsFromSearchIndex(HasSearchInterface $entity = null): array
+    protected function findAllIdsFromSearchIndex(?HasSearchInterface $entity = null): array
     {
         //Get all ids from the index
         $query = $this->getSolrClient()->createSelect();
