@@ -113,7 +113,7 @@ class SearchUpdateService
             $entity = ClassUtils::getRealClass(className: $entity::class);
         }
 
-        Assert::implementsInterface(value: $entity, interface: SearchServiceInterface::class);
+        Assert::implementsInterface(value: $entity, interface: HasSearchInterface::class);
 
         $services = [];
 
