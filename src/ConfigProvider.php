@@ -189,9 +189,9 @@ final class ConfigProvider
                          * Route specific messages to specific transports by using the message name as the key.
                          */
                         'routes'               => [
-                            UpdateSearchEntitiesMessage::class => ['my.redis.transport'],
-                            UpdateSearchEntityMessage::class   => ['my.redis.transport'],
-                            UpdateSearchIndexMessage::class    => ['my.redis.transport'],
+                            UpdateSearchEntitiesHandler::class => ['my.redis.transport'],
+                            UpdateSearchEntityHandler::class   => ['my.redis.transport'],
+                            UpdateSearchIndexHandler::class    => ['my.redis.transport'],
                         ],
                     ],
                 ],
