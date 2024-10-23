@@ -21,6 +21,7 @@ use Jield\Search\Service\ConsoleService;
 use Jield\Search\Service\SearchUpdateService;
 use Laminas\ServiceManager\AbstractFactory\ConfigAbstractFactory;
 use Netglue\PsrContainer\Messenger\Container\MessageBusStaticFactory;
+use Netglue\PsrContainer\Messenger\Container\Middleware\BusNameStampMiddlewareStaticFactory;
 use Netglue\PsrContainer\Messenger\Container\Middleware\MessageHandlerMiddlewareStaticFactory;
 use Netglue\PsrContainer\Messenger\Container\Middleware\MessageSenderMiddlewareStaticFactory;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface as SymfonySerializer;
@@ -86,6 +87,7 @@ final class ConfigProvider
                 SearchUpdateService::class                    => SearchUpdateServiceFactory::class,
                 ConsoleService::class                         => ConsoleServiceFactory::class,
                 'Jield\Search\Command\Bus'                    => [MessageBusStaticFactory::class, 'Jield\Search\Command\Bus'],
+                'Jield\Search\Command\Bus\Name\Middleware'    => [BusNameStampMiddlewareStaticFactory::class, 'Jield\Search\Command\Bus'],
                 'Jield\Search\Command\Bus\Sender\Middleware'  => [MessageSenderMiddlewareStaticFactory::class, 'Jield\Search\Command\Bus'],
                 'Jield\Search\Command\Bus\Handler\Middleware' => [MessageHandlerMiddlewareStaticFactory::class, 'Jield\Search\Command\Bus'],
                 'my.redis.transport'                          => [\Netglue\PsrContainer\Messenger\Container\TransportFactory::class, 'my.redis.transport'],
@@ -118,24 +120,8 @@ final class ConfigProvider
             'messenger' => [
                 'failure_transport' => 'my_default_failure_transport',
                 'transports'        => [
-                    // Doctrine…
-                    // @link https://symfony.com/doc/current/messenger.html#doctrine-transport
-                    'my.doctrine.transport'  => [
-                        'dsn'        => 'doctrine://default',
-                        'options'    => [],
-                        'serializer' => SymfonySerializer::class,
-                    ],
-
-                    // In Memory for Testing
-                    'my.in-memory.transport' => [
-                        'dsn'        => 'in-memory://',
-                        'options'    => [],
-                        'serializer' => SymfonySerializer::class,
-                    ],
-
-                    // Redis
                     // @link https://symfony.com/doc/current/messenger.html#redis-transport
-                    'my.redis.transport'     => [
+                    'my.redis.transport' => [
                         'dsn'        => 'redis://redis-itea:6379/messages',
                         'options'    => [], // Redis specific options
                         'serializer' => SymfonySerializer::class,
@@ -151,7 +137,7 @@ final class ConfigProvider
                          * Below is a minimal configuration to handle messages
                          */
                         'middleware'           => [
-                            // … Middleware that inspects the message before it has been sent to a transport would go here.
+                            'Jield\Search\Command\Bus\Name\Middleware', // Add the name to the envelope (make sure this is the first middleware)
                             'Jield\Search\Command\Bus\Sender\Middleware', // Sends messages via a transport if configured.
                             'Jield\Search\Command\Bus\Handler\Middleware', // Executes the handlers configured for the message
                         ],
