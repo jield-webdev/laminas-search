@@ -24,6 +24,8 @@ use Netglue\PsrContainer\Messenger\Container\MessageBusStaticFactory;
 use Netglue\PsrContainer\Messenger\Container\Middleware\BusNameStampMiddlewareStaticFactory;
 use Netglue\PsrContainer\Messenger\Container\Middleware\MessageHandlerMiddlewareStaticFactory;
 use Netglue\PsrContainer\Messenger\Container\Middleware\MessageSenderMiddlewareStaticFactory;
+use Netglue\PsrContainer\Messenger\Container\TransportFactory;
+use Netglue\PsrContainer\Messenger\HandlerLocator\OneToOneFqcnContainerHandlerLocator;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface as SymfonySerializer;
 
 final class ConfigProvider
@@ -90,8 +92,9 @@ final class ConfigProvider
                 'Jield\Search\Command\Bus\Name\Middleware'    => [BusNameStampMiddlewareStaticFactory::class, 'Jield\Search\Command\Bus'],
                 'Jield\Search\Command\Bus\Sender\Middleware'  => [MessageSenderMiddlewareStaticFactory::class, 'Jield\Search\Command\Bus'],
                 'Jield\Search\Command\Bus\Handler\Middleware' => [MessageHandlerMiddlewareStaticFactory::class, 'Jield\Search\Command\Bus'],
-                'my.redis.transport'                          => [\Netglue\PsrContainer\Messenger\Container\TransportFactory::class, 'my.redis.transport'],
-                'my_default_failure_transport'                => [\Netglue\PsrContainer\Messenger\Container\TransportFactory::class, 'my.redis.transport'],
+                'Jield\Search\Transport\Doctrine'             => [TransportFactory::class, 'Jield\Search\Transport\Doctrine'],
+                'my_default_failure_transport'                => [TransportFactory::class, 'my_default_failure_transport'],
+                'command_failures'                            => [TransportFactory::class, 'command_failures'],
             ],
         ];
     }
@@ -120,11 +123,16 @@ final class ConfigProvider
             'messenger' => [
                 'failure_transport' => 'my_default_failure_transport',
                 'transports'        => [
-                    // @link https://symfony.com/doc/current/messenger.html#redis-transport
-                    'my.redis.transport' => [
-                        'dsn'        => 'redis://redis-itea:6379/messages',
-                        'options'    => [], // Redis specific options
+                    'Jield\Search\Transport\Doctrine' => [
+                        'dsn'        => 'doctrine://doctrine.entitymanager.orm_default',
+                        'options'    => [
+                            'table_name' => 'admin_messages',
+                            'queue_name' => 'Jield\Search\Transport\Doctrine',
+                        ],
                         'serializer' => SymfonySerializer::class,
+                    ],
+                    'my_default_failure_transport'    => [
+                        'dsn' => 'in-memory:///',
                     ],
                 ],
                 'buses'             => [
@@ -149,18 +157,12 @@ final class ConfigProvider
                          * Both locators operate on the basis that handlers are available in the container.
                          *
                          */
-                        'handler_locator'      => \Netglue\PsrContainer\Messenger\HandlerLocator\OneToOneFqcnContainerHandlerLocator::class,
+                        'handler_locator'      => OneToOneFqcnContainerHandlerLocator::class,
                         'handlers'             => [
-                            // Example using OneToManyFqcnContainerHandlerLocator:
-                            // \My\Event\SomethingHappened::class => [\My\ReactOnce::class, \My\ReactTwice::class],
-
-                            // Example using OneToOneFqcnContainerHandlerLocator
                             UpdateSearchEntitiesMessage::class => UpdateSearchEntitiesHandler::class,
                             UpdateSearchEntityMessage::class   => UpdateSearchEntityHandler::class,
                             UpdateSearchIndexMessage::class    => UpdateSearchIndexHandler::class,
                         ],
-
-                        //                    'logger' => 'MyLogger2', // Optional, but useful for debugging
 
                         /**
                          * Routes define which transport(s) that messages dispatched on this bus should be sent with.
@@ -175,9 +177,9 @@ final class ConfigProvider
                          * Route specific messages to specific transports by using the message name as the key.
                          */
                         'routes'               => [
-                            UpdateSearchEntitiesMessage::class => ['my.redis.transport'],
-                            UpdateSearchEntityMessage::class   => ['my.redis.transport'],
-                            UpdateSearchIndexMessage::class    => ['my.redis.transport'],
+                            UpdateSearchEntitiesMessage::class => ['Jield\Search\Transport\Doctrine'],
+                            UpdateSearchEntityMessage::class   => ['Jield\Search\Transport\Doctrine'],
+                            UpdateSearchIndexMessage::class    => ['Jield\Search\Transport\Doctrine'],
                         ],
                     ],
                 ],

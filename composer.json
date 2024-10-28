@@ -17,12 +17,6 @@
       "homepage": "https://jield.nl"
     }
   ],
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "git@github.com:jield-webdev/laminas-mvc-messenger"
-    }
-  ],
   "minimum-stability": "dev",
   "require": {
     "php": "~8.1.0 || ~8.2.0 || ~8.3.0 || ~8.4.0",
@@ -30,12 +24,12 @@
     "laminas/laminas-form": "^3.22",
     "laminas/laminas-i18n": "^2.30",
     "laminas/laminas-paginator": "^2.20",
+    "jield-webdev/laminas-mvc-messenger": "^2.5",
     "doctrine/orm": "^2 || ^3",
     "kokspflanze/zfc-twig": "~4.1",
     "jetbrains/phpstorm-attributes": "^1.0",
     "doctrine/common": "^3.4.5",
-    "solarium/solarium": "^6.3",
-    "netglue/laminas-messenger": "2.4.x-dev"
+    "solarium/solarium": "^6.3"
   },
   "require-dev": {
     "iteaoffice/testing": "^4.1-dev"
