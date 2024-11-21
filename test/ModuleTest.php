@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace LaminasSearchTest;
+namespace Jield\SearchTest;
 
 use Jield\Search\Module;
 use Laminas\ServiceManager\AbstractFactory\ConfigAbstractFactory;

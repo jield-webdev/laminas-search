@@ -2,15 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Jield\Search\Job;
+namespace Jield\Search\Message\Handler;
 
 use Doctrine\ORM\EntityManager;
+use Jield\Search\Message\UpdateSearchIndexMessage;
 use Jield\Search\Service\AbstractSearchService;
 use Psr\Container\ContainerInterface;
-use SlmQueue\Job\AbstractJob;
 use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-final class UpdateSearchIndex extends AbstractJob
+#[AsMessageHandler]
+final class UpdateSearchIndexHandler
 {
     public function __construct(
         private readonly ContainerInterface $container,
@@ -19,10 +21,10 @@ final class UpdateSearchIndex extends AbstractJob
     {
     }
 
-    public function execute(): ?int
+    public function __invoke(UpdateSearchIndexMessage $updateSearchIndexMessage): int
     {
-        $entityClassName = $this->getContent()['entityClassName'];
-        $searchServices  = $this->getContent()['searchServices'];
+        $entityClassName = $updateSearchIndexMessage->getEntityClassName();
+        $searchServices  = $updateSearchIndexMessage->getSearchServices();
 
         //Clear the entity manager to always have fresh results
         $this->entityManager->clear();
@@ -36,6 +38,6 @@ final class UpdateSearchIndex extends AbstractJob
             $searchServiceInstance->updateCollection(output: $output, entity: new $entityClassName());
         }
 
-        return null;
+        return 0;
     }
 }

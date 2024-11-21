@@ -7,40 +7,31 @@ namespace Jield\Search\Service;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Util\ClassUtils;
 use Jield\Search\Entity\HasSearchInterface;
-use Jield\Search\Job\UpdateSearchEntities;
-use Jield\Search\Job\UpdateSearchEntity;
-use Jield\Search\Job\UpdateSearchIndex;
+use Jield\Search\Message\UpdateSearchEntitiesMessage;
+use Jield\Search\Message\UpdateSearchEntityMessage;
+use Jield\Search\Message\UpdateSearchIndexMessage;
 use Psr\Container\ContainerInterface;
-use SlmQueue\Job\JobPluginManager;
-use SlmQueue\Queue\QueuePluginManager;
-use SlmQueueDoctrine\Queue\DoctrineQueue;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Webmozart\Assert\Assert;
 
 class SearchUpdateService
 {
-    private DoctrineQueue $queue;
-
     public function __construct(
-        private readonly ContainerInterface $container,
-        private readonly array              $cores,
-        private readonly JobPluginManager   $jobPluginManager,
-        private readonly QueuePluginManager $queuePluginManager
+        private readonly ContainerInterface  $container,
+        private readonly MessageBusInterface $bus,
+        private readonly array               $cores,
     )
     {
-        $this->queue = $this->queuePluginManager->get(name: 'search');
     }
 
     public function updateEntity(HasSearchInterface $entity, bool $queued = false): void
     {
         if ($queued) {
-            $job = $this->jobPluginManager->get(name: UpdateSearchEntity::class);
-            $job->setContent([
-                'entityClassName' => $entity::class,
-                'entityId'        => $entity->getId(),
-                'searchServices'  => $this->findSearchServicesFromEntity(entity: $entity),
-            ]);
-
-            $this->queue->push(job: $job);
+            $this->bus->dispatch(new UpdateSearchEntityMessage(
+                entityClassName: $entity::class,
+                entityId: $entity->getId(),
+                searchServices: $this->findSearchServicesFromEntity(entity: $entity),
+            ));
 
             return;
         }
@@ -67,8 +58,6 @@ class SearchUpdateService
 
     public function updateEntities(array|Collection $entities): void
     {
-        $job = $this->jobPluginManager->get(name: UpdateSearchEntities::class);
-
         //Always convert to array
         if ($entities instanceof Collection) {
             $entities = $entities->toArray();
@@ -81,7 +70,7 @@ class SearchUpdateService
 
         //When doing this, the entities _must_ be of the same class
         //Use the entity class name of the first entity (use reset to get the last element)
-        $firstEntity = reset($entities);
+        $firstEntity = reset(array: $entities);
 
         $entityClassName = $firstEntity::class;
 
@@ -89,21 +78,18 @@ class SearchUpdateService
         $entityIds = [];
         foreach ($entities as $updateAbleEntity) {
             //We only allow entities of the same class
-            if (ClassUtils::getRealClass(className: $updateAbleEntity::class) !== ClassUtils::getRealClass($entityClassName)) {
-                throw new \InvalidArgumentException('All entities must be of the same class, got ' . ClassUtils::getRealClass(className: $updateAbleEntity::class) . ' and expected ' . $entityClassName);
+            if (ClassUtils::getRealClass(className: $updateAbleEntity::class) !== ClassUtils::getRealClass(className: $entityClassName)) {
+                throw new \InvalidArgumentException(message: 'All entities must be of the same class, got ' . ClassUtils::getRealClass(className: $updateAbleEntity::class) . ' and expected ' . $entityClassName);
             }
 
             $entityIds[] = $updateAbleEntity->getId();
         }
 
-
-        $job->setContent([
-            'entityClassName' => $entityClassName,
-            'entityIds'       => $entityIds,
-            'searchServices'  => $this->findSearchServicesFromEntity(entity: new $entityClassName()),
-        ]);
-
-        $this->queue->push(job: $job);
+        $this->bus->dispatch(new UpdateSearchEntitiesMessage(
+            entityClassName: $entityClassName,
+            entityIds: $entityIds,
+            searchServices: $this->findSearchServicesFromEntity(entity: $entityClassName),
+        ));
     }
 
     public function updateIndex(string $entityClassName): void
@@ -112,30 +98,31 @@ class SearchUpdateService
         $entityClassName = ClassUtils::getRealClass(className: $entityClassName);
 
         //Only entity classnames which implement interface can be used
-        Assert::isInstanceOf(new $entityClassName(), class: HasSearchInterface::class);
+        Assert::isInstanceOf(value: new $entityClassName(), class: HasSearchInterface::class);
 
-        $job = $this->jobPluginManager->get(name: UpdateSearchIndex::class);
-        $job->setContent([
-            'entityClassName' => $entityClassName,
-            'searchServices'  => $this->findSearchServicesFromEntity(entity: new $entityClassName()),
-        ]);
-
-        $this->queue->push(job: $job);
+        $this->bus->dispatch(new UpdateSearchIndexMessage(
+            entityClassName: $entityClassName,
+            searchServices: $this->findSearchServicesFromEntity(entity: $entityClassName),
+        ));
     }
 
-    private function findSearchServicesFromEntity(HasSearchInterface $entity): array
+    private function findSearchServicesFromEntity(string|HasSearchInterface $entity): array
     {
-        //Sometimes we get proxies, then we need to get the real class
-        $entityClassName = ClassUtils::getRealClass(className: $entity::class);
+        //Always cast to the string value
+        if ($entity instanceof HasSearchInterface) {
+            $entity = ClassUtils::getRealClass(className: $entity::class);
+        }
+
+        Assert::implementsInterface(value: $entity, interface: HasSearchInterface::class);
 
         $services = [];
 
         foreach ($this->cores as $core) {
-            if ($core['entity'] === $entityClassName) {
+            if ($core['entity'] === $entity) {
                 $services[] = $core['service'];
             }
         }
 
-        return array_unique($services);
+        return array_unique(array: $services);
     }
 }

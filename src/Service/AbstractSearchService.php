@@ -10,8 +10,8 @@ use Doctrine\ORM\EntityManager;
 use Jield\Search\Document\DocumentHelperInterface;
 use Jield\Search\Entity\HasSearchInterface;
 use Jield\Search\ValueObject\FacetField;
-use Laminas\I18n\Translator\TranslatorInterface;
 use Laminas\Json\Json;
+use Laminas\Translator\TranslatorInterface;
 use Psr\Container\ContainerInterface;
 use RuntimeException;
 use Solarium\Client;
@@ -47,7 +47,7 @@ abstract class AbstractSearchService implements SearchServiceInterface
 
     private array $config;
 
-    private readonly string $connection;
+    private string $connection;
 
     public function __construct(protected readonly ContainerInterface $container)
     {
@@ -289,7 +289,7 @@ abstract class AbstractSearchService implements SearchServiceInterface
         $this->getSolrClient()->update(query: $update);
     }
 
-    protected function findAllIdsFromSearchIndex(HasSearchInterface $entity = null): array
+    protected function findAllIdsFromSearchIndex(?HasSearchInterface $entity = null): array
     {
         //Get all ids from the index
         $query = $this->getSolrClient()->createSelect();
