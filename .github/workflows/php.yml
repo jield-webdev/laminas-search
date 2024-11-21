@@ -45,3 +45,6 @@ jobs:
 
       - name: PHPStan test
         run: composer phpstan
+
+      - name: Run test suite
+        run: composer test
