@@ -24,7 +24,7 @@
     "laminas/laminas-form": "^3.22",
     "laminas/laminas-i18n": "^2.30",
     "laminas/laminas-paginator": "^2.20",
-    "jield-webdev/laminas-mvc-messenger": "^2.5",
+    "jield-webdev/laminas-mvc-messenger": "^3.0",
     "doctrine/orm": "^2 || ^3",
     "kokspflanze/zfc-twig": "~4.1",
     "jetbrains/phpstorm-attributes": "^1.0",
