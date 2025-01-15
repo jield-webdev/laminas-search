@@ -29,9 +29,9 @@ use function sprintf;
 
 abstract class AbstractSearchService implements SearchServiceInterface
 {
-    final public const DATE_SOLR = 'Y-m-d\TH:i:s\Z';
-    final public const QUERY_TERM_BOOST = 30;
-    public const SOLR_CONNECTION = 'default';
+    final public const string DATE_SOLR = 'Y-m-d\TH:i:s\Z';
+    final public const int QUERY_TERM_BOOST = 30;
+    public const string SOLR_CONNECTION = 'default';
 
     protected ?Client $solrClient = null;
 
@@ -95,6 +95,7 @@ abstract class AbstractSearchService implements SearchServiceInterface
             $eventDispatcher = new EventDispatcher();
 
             $this->solrClient = new Client(adapter: $adapter, eventDispatcher: $eventDispatcher, options: $params);
+            $this->solrClient->getPlugin(key: 'postbigrequest')->setOptions(options: ['buffer' => 1000]);
         }
 
         return $this->solrClient;
